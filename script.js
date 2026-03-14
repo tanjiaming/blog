@@ -5,6 +5,22 @@ let isAuthenticated = false;
 let authExpiryTime = 0;
 let currentEditItem = null;
 let currentEditType = null;
+let db;
+
+// 等待Firebase初始化完成
+function waitForFirebase() {
+    return new Promise((resolve) => {
+        const checkFirebase = () => {
+            if (window.db) {
+                db = window.db;
+                resolve();
+            } else {
+                setTimeout(checkFirebase, 100);
+            }
+        };
+        checkFirebase();
+    });
+}
 
 // 导入Firebase函数
 import { collection, getDocs, setDoc, doc, deleteDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
@@ -42,6 +58,7 @@ const elements = {
 
 // 初始化
 async function init() {
+    await waitForFirebase();
     await loadData();
     setupEventListeners();
     renderContent();
@@ -61,35 +78,35 @@ async function loadData() {
         };
         
         // 加载文章
-        const articlesQuery = query(collection(window.db, 'articles'), orderBy('date', 'desc'), orderBy('time', 'desc'));
+        const articlesQuery = query(collection(db, 'articles'), orderBy('date', 'desc'), orderBy('time', 'desc'));
         const articlesSnapshot = await getDocs(articlesQuery);
         articlesSnapshot.forEach(doc => {
             data.articles.push({ id: doc.id, ...doc.data() });
         });
         
         // 加载灵感
-        const ideasQuery = query(collection(window.db, 'ideas'), orderBy('date', 'desc'), orderBy('time', 'desc'));
+        const ideasQuery = query(collection(db, 'ideas'), orderBy('date', 'desc'), orderBy('time', 'desc'));
         const ideasSnapshot = await getDocs(ideasQuery);
         ideasSnapshot.forEach(doc => {
             data.ideas.push({ id: doc.id, ...doc.data() });
         });
         
         // 加载作品
-        const worksQuery = query(collection(window.db, 'works'), orderBy('date', 'desc'), orderBy('time', 'desc'));
+        const worksQuery = query(collection(db, 'works'), orderBy('date', 'desc'), orderBy('time', 'desc'));
         const worksSnapshot = await getDocs(worksQuery);
         worksSnapshot.forEach(doc => {
             data.works.push({ id: doc.id, ...doc.data() });
         });
         
         // 加载生活
-        const lifeQuery = query(collection(window.db, 'life'), orderBy('date', 'desc'), orderBy('time', 'desc'));
+        const lifeQuery = query(collection(db, 'life'), orderBy('date', 'desc'), orderBy('time', 'desc'));
         const lifeSnapshot = await getDocs(lifeQuery);
         lifeSnapshot.forEach(doc => {
             data.life.push({ id: doc.id, ...doc.data() });
         });
         
         // 加载健康
-        const healthQuery = query(collection(window.db, 'health'), orderBy('date', 'desc'), orderBy('time', 'desc'));
+        const healthQuery = query(collection(db, 'health'), orderBy('date', 'desc'), orderBy('time', 'desc'));
         const healthSnapshot = await getDocs(healthQuery);
         healthSnapshot.forEach(doc => {
             data.health.push({ id: doc.id, ...doc.data() });
@@ -114,27 +131,27 @@ async function saveData() {
     try {
         // 保存文章
         for (const article of data.articles) {
-            await setDoc(doc(window.db, 'articles', article.id), article);
+            await setDoc(doc(db, 'articles', article.id), article);
         }
         
         // 保存灵感
         for (const idea of data.ideas) {
-            await setDoc(doc(window.db, 'ideas', idea.id), idea);
+            await setDoc(doc(db, 'ideas', idea.id), idea);
         }
         
         // 保存作品
         for (const work of data.works) {
-            await setDoc(doc(window.db, 'works', work.id), work);
+            await setDoc(doc(db, 'works', work.id), work);
         }
         
         // 保存生活
         for (const item of data.life) {
-            await setDoc(doc(window.db, 'life', item.id), item);
+            await setDoc(doc(db, 'life', item.id), item);
         }
         
         // 保存健康
         for (const item of data.health) {
-            await setDoc(doc(window.db, 'health', item.id), item);
+            await setDoc(doc(db, 'health', item.id), item);
         }
         
         console.log('数据保存成功');
@@ -530,7 +547,7 @@ async function confirmDelete(type, id) {
     if (confirm('确定要删除吗？')) {
         try {
             // 从Firestore中删除数据
-            await deleteDoc(doc(window.db, type, id));
+            await deleteDoc(doc(db, type, id));
             // 从本地数据中删除
             data[type] = data[type].filter(item => item.id !== id);
             // 重新渲染内容
