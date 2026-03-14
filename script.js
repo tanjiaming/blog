@@ -174,7 +174,11 @@ function renderContent() {
 
 // 渲染文章
 function renderArticles() {
-    const articles = (data.articles || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const articles = (data.articles || []).sort((a, b) => {
+        const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
+        const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
+        return dateB - dateA;
+    });
     elements.articlesList.innerHTML = articles.map(article => `
         <div class="content-item">
             <div class="title-container">
@@ -192,7 +196,11 @@ function renderArticles() {
 
 // 渲染灵感
 function renderIdeas() {
-    const ideas = (data.ideas || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const ideas = (data.ideas || []).sort((a, b) => {
+        const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
+        const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
+        return dateB - dateA;
+    });
     elements.ideasList.innerHTML = ideas.map(idea => `
         <div class="content-item">
             <div class="title-container">
@@ -210,7 +218,11 @@ function renderIdeas() {
 
 // 渲染作品
 function renderWorks() {
-    const works = (data.works || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const works = (data.works || []).sort((a, b) => {
+        const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
+        const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
+        return dateB - dateA;
+    });
     const activeCategory = document.querySelector('.category-btn.active').dataset.category;
     
     const filteredWorks = activeCategory === 'all' 
@@ -236,7 +248,11 @@ function renderWorks() {
 
 // 渲染生活
 function renderLife() {
-    const life = (data.life || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const life = (data.life || []).sort((a, b) => {
+        const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
+        const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
+        return dateB - dateA;
+    });
     elements.lifeList.innerHTML = life.map(item => `
         <div class="content-item">
             <div class="title-container">
@@ -250,7 +266,11 @@ function renderLife() {
 
 // 渲染健康
 function renderHealth() {
-    const health = (data.health || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const health = (data.health || []).sort((a, b) => {
+        const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
+        const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
+        return dateB - dateA;
+    });
     elements.healthList.innerHTML = health.map(item => `
         <div class="content-item">
             <div class="title-container">
@@ -445,7 +465,11 @@ function performSearch() {
             const filteredArticles = data.articles.filter(article => 
                 article.title.toLowerCase().includes(searchTerm) || 
                 article.content.toLowerCase().includes(searchTerm)
-            ).sort((a, b) => new Date(b.date) - new Date(a.date));
+            ).sort((a, b) => {
+                const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
+                const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
+                return dateB - dateA;
+            });
             elements.articlesList.innerHTML = filteredArticles.map(article => `
                 <div class="content-item">
                     <div class="title-container">
@@ -464,7 +488,11 @@ function performSearch() {
             const filteredIdeas = data.ideas.filter(idea => 
                 idea.title.toLowerCase().includes(searchTerm) || 
                 idea.content.toLowerCase().includes(searchTerm)
-            ).sort((a, b) => new Date(b.date) - new Date(a.date));
+            ).sort((a, b) => {
+                const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
+                const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
+                return dateB - dateA;
+            });
             elements.ideasList.innerHTML = filteredIdeas.map(idea => `
                 <div class="content-item">
                     <div class="title-container">
@@ -483,7 +511,11 @@ function performSearch() {
             const filteredWorks = data.works.filter(work => 
                 work.title.toLowerCase().includes(searchTerm) || 
                 work.description.toLowerCase().includes(searchTerm)
-            ).sort((a, b) => new Date(b.date) - new Date(a.date));
+            ).sort((a, b) => {
+                const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
+                const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
+                return dateB - dateA;
+            });
             elements.worksList.innerHTML = filteredWorks.map(work => `
                 <div class="work-item">
                     <img src="${work.image}" alt="${work.title}" class="work-image">
