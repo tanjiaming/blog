@@ -346,28 +346,32 @@ body.light-mode #search-btn {
     gap: 12px;
 }
 
-#theme-toggle {
+#theme-toggle,
+#import-data {
     border: 1px solid;
-    font-size: 18px;
+    font-size: 14px;
     cursor: pointer;
-    padding: 8px;
+    padding: 8px 12px;
     border-radius: 6px;
     transition: all 0.3s ease;
 }
 
-body.dark-mode #theme-toggle {
+body.dark-mode #theme-toggle,
+body.dark-mode #import-data {
     background: rgba(16, 18, 27, 0.8);
     border-color: rgba(66, 153, 225, 0.2);
     color: #8b949e;
 }
 
-body.light-mode #theme-toggle {
+body.light-mode #theme-toggle,
+body.light-mode #import-data {
     background: rgba(255, 255, 255, 0.8);
     border-color: rgba(66, 153, 225, 0.3);
     color: #6c757d;
 }
 
-#theme-toggle:hover {
+#theme-toggle:hover,
+#import-data:hover {
     border-color: #4299e1;
     color: #4299e1;
     box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);

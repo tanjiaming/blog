@@ -654,5 +654,51 @@ function toggleTheme() {
     }, 500);
 }
 
+// 将localStorage数据导入到Firebase
+async function importFromLocalStorage() {
+    try {
+        const savedData = localStorage.getItem('portfolioData');
+        if (savedData) {
+            const localStorageData = JSON.parse(savedData);
+            
+            // 导入文章
+            for (const article of localStorageData.articles || []) {
+                await setDoc(doc(window.db, 'articles', article.id), article);
+            }
+            
+            // 导入灵感
+            for (const idea of localStorageData.ideas || []) {
+                await setDoc(doc(window.db, 'ideas', idea.id), idea);
+            }
+            
+            // 导入作品
+            for (const work of localStorageData.works || []) {
+                await setDoc(doc(window.db, 'works', work.id), work);
+            }
+            
+            // 导入生活
+            for (const item of localStorageData.life || []) {
+                await setDoc(doc(window.db, 'life', item.id), item);
+            }
+            
+            // 导入健康
+            for (const item of localStorageData.health || []) {
+                await setDoc(doc(window.db, 'health', item.id), item);
+            }
+            
+            console.log('localStorage数据导入成功');
+            alert('数据导入成功！');
+            // 重新加载数据
+            await loadData();
+            renderContent();
+        } else {
+            alert('localStorage中没有数据');
+        }
+    } catch (error) {
+        console.error('导入数据失败:', error);
+        alert('导入数据失败，请重试');
+    }
+}
+
 // 初始化应用
 init();
