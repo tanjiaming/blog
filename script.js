@@ -6,6 +6,9 @@ let authExpiryTime = 0;
 let currentEditItem = null;
 let currentEditType = null;
 
+// 导入Firebase函数
+import { collection, getDocs, setDoc, doc, deleteDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
 // DOM 元素
 const elements = {
     navItems: document.querySelectorAll('.nav-item'),
@@ -48,7 +51,7 @@ async function init() {
 // 加载数据
 async function loadData() {
     try {
-        // 从LeanCloud加载数据
+        // 从Firestore加载数据
         data = {
             articles: [],
             ideas: [],
@@ -58,71 +61,39 @@ async function loadData() {
         };
         
         // 加载文章
-        const Article = AV.Object.extend('Article');
-        const articleQuery = new AV.Query(Article);
-        articleQuery.descending('date').descending('time');
-        const articles = await articleQuery.find();
-        data.articles = articles.map(item => ({
-            id: item.id,
-            title: item.get('title'),
-            content: item.get('content'),
-            date: item.get('date'),
-            time: item.get('time')
-        }));
+        const articlesQuery = query(collection(window.db, 'articles'), orderBy('date', 'desc'), orderBy('time', 'desc'));
+        const articlesSnapshot = await getDocs(articlesQuery);
+        articlesSnapshot.forEach(doc => {
+            data.articles.push({ id: doc.id, ...doc.data() });
+        });
         
         // 加载灵感
-        const Idea = AV.Object.extend('Idea');
-        const ideaQuery = new AV.Query(Idea);
-        ideaQuery.descending('date').descending('time');
-        const ideas = await ideaQuery.find();
-        data.ideas = ideas.map(item => ({
-            id: item.id,
-            title: item.get('title'),
-            content: item.get('content'),
-            date: item.get('date'),
-            time: item.get('time')
-        }));
+        const ideasQuery = query(collection(window.db, 'ideas'), orderBy('date', 'desc'), orderBy('time', 'desc'));
+        const ideasSnapshot = await getDocs(ideasQuery);
+        ideasSnapshot.forEach(doc => {
+            data.ideas.push({ id: doc.id, ...doc.data() });
+        });
         
         // 加载作品
-        const Work = AV.Object.extend('Work');
-        const workQuery = new AV.Query(Work);
-        workQuery.descending('date').descending('time');
-        const works = await workQuery.find();
-        data.works = works.map(item => ({
-            id: item.id,
-            title: item.get('title'),
-            description: item.get('description'),
-            category: item.get('category'),
-            image: item.get('image'),
-            date: item.get('date'),
-            time: item.get('time')
-        }));
+        const worksQuery = query(collection(window.db, 'works'), orderBy('date', 'desc'), orderBy('time', 'desc'));
+        const worksSnapshot = await getDocs(worksQuery);
+        worksSnapshot.forEach(doc => {
+            data.works.push({ id: doc.id, ...doc.data() });
+        });
         
         // 加载生活
-        const Life = AV.Object.extend('Life');
-        const lifeQuery = new AV.Query(Life);
-        lifeQuery.descending('date').descending('time');
-        const lifeItems = await lifeQuery.find();
-        data.life = lifeItems.map(item => ({
-            id: item.id,
-            title: item.get('title'),
-            content: item.get('content'),
-            date: item.get('date'),
-            time: item.get('time')
-        }));
+        const lifeQuery = query(collection(window.db, 'life'), orderBy('date', 'desc'), orderBy('time', 'desc'));
+        const lifeSnapshot = await getDocs(lifeQuery);
+        lifeSnapshot.forEach(doc => {
+            data.life.push({ id: doc.id, ...doc.data() });
+        });
         
         // 加载健康
-        const Health = AV.Object.extend('Health');
-        const healthQuery = new AV.Query(Health);
-        healthQuery.descending('date').descending('time');
-        const healthItems = await healthQuery.find();
-        data.health = healthItems.map(item => ({
-            id: item.id,
-            title: item.get('title'),
-            content: item.get('content'),
-            date: item.get('date'),
-            time: item.get('time')
-        }));
+        const healthQuery = query(collection(window.db, 'health'), orderBy('date', 'desc'), orderBy('time', 'desc'));
+        const healthSnapshot = await getDocs(healthQuery);
+        healthSnapshot.forEach(doc => {
+            data.health.push({ id: doc.id, ...doc.data() });
+        });
         
         console.log('数据加载成功:', data);
     } catch (error) {
@@ -138,126 +109,32 @@ async function loadData() {
     }
 }
 
-// 保存数据到LeanCloud
+// 保存数据到Firestore
 async function saveData() {
     try {
         // 保存文章
         for (const article of data.articles) {
-            if (article.id) {
-                // 更新现有文章
-                const articleObj = AV.Object.createWithoutData('Article', article.id);
-                articleObj.set('title', article.title);
-                articleObj.set('content', article.content);
-                articleObj.set('date', article.date);
-                articleObj.set('time', article.time);
-                await articleObj.save();
-            } else {
-                // 创建新文章
-                const Article = AV.Object.extend('Article');
-                const articleObj = new Article();
-                articleObj.set('title', article.title);
-                articleObj.set('content', article.content);
-                articleObj.set('date', article.date);
-                articleObj.set('time', article.time);
-                const savedArticle = await articleObj.save();
-                article.id = savedArticle.id;
-            }
+            await setDoc(doc(window.db, 'articles', article.id), article);
         }
         
         // 保存灵感
         for (const idea of data.ideas) {
-            if (idea.id) {
-                // 更新现有灵感
-                const ideaObj = AV.Object.createWithoutData('Idea', idea.id);
-                ideaObj.set('title', idea.title);
-                ideaObj.set('content', idea.content);
-                ideaObj.set('date', idea.date);
-                ideaObj.set('time', idea.time);
-                await ideaObj.save();
-            } else {
-                // 创建新灵感
-                const Idea = AV.Object.extend('Idea');
-                const ideaObj = new Idea();
-                ideaObj.set('title', idea.title);
-                ideaObj.set('content', idea.content);
-                ideaObj.set('date', idea.date);
-                ideaObj.set('time', idea.time);
-                const savedIdea = await ideaObj.save();
-                idea.id = savedIdea.id;
-            }
+            await setDoc(doc(window.db, 'ideas', idea.id), idea);
         }
         
         // 保存作品
         for (const work of data.works) {
-            if (work.id) {
-                // 更新现有作品
-                const workObj = AV.Object.createWithoutData('Work', work.id);
-                workObj.set('title', work.title);
-                workObj.set('description', work.description);
-                workObj.set('category', work.category);
-                workObj.set('image', work.image);
-                workObj.set('date', work.date);
-                workObj.set('time', work.time);
-                await workObj.save();
-            } else {
-                // 创建新作品
-                const Work = AV.Object.extend('Work');
-                const workObj = new Work();
-                workObj.set('title', work.title);
-                workObj.set('description', work.description);
-                workObj.set('category', work.category);
-                workObj.set('image', work.image);
-                workObj.set('date', work.date);
-                workObj.set('time', work.time);
-                const savedWork = await workObj.save();
-                work.id = savedWork.id;
-            }
+            await setDoc(doc(window.db, 'works', work.id), work);
         }
         
         // 保存生活
         for (const item of data.life) {
-            if (item.id) {
-                // 更新现有生活
-                const lifeObj = AV.Object.createWithoutData('Life', item.id);
-                lifeObj.set('title', item.title);
-                lifeObj.set('content', item.content);
-                lifeObj.set('date', item.date);
-                lifeObj.set('time', item.time);
-                await lifeObj.save();
-            } else {
-                // 创建新生活
-                const Life = AV.Object.extend('Life');
-                const lifeObj = new Life();
-                lifeObj.set('title', item.title);
-                lifeObj.set('content', item.content);
-                lifeObj.set('date', item.date);
-                lifeObj.set('time', item.time);
-                const savedLife = await lifeObj.save();
-                item.id = savedLife.id;
-            }
+            await setDoc(doc(window.db, 'life', item.id), item);
         }
         
         // 保存健康
         for (const item of data.health) {
-            if (item.id) {
-                // 更新现有健康
-                const healthObj = AV.Object.createWithoutData('Health', item.id);
-                healthObj.set('title', item.title);
-                healthObj.set('content', item.content);
-                healthObj.set('date', item.date);
-                healthObj.set('time', item.time);
-                await healthObj.save();
-            } else {
-                // 创建新健康
-                const Health = AV.Object.extend('Health');
-                const healthObj = new Health();
-                healthObj.set('title', item.title);
-                healthObj.set('content', item.content);
-                healthObj.set('date', item.date);
-                healthObj.set('time', item.time);
-                const savedHealth = await healthObj.save();
-                item.id = savedHealth.id;
-            }
+            await setDoc(doc(window.db, 'health', item.id), item);
         }
         
         console.log('数据保存成功');
@@ -652,17 +529,8 @@ async function confirmDelete(type, id) {
 
     if (confirm('确定要删除吗？')) {
         try {
-            // 从LeanCloud中删除数据
-            const typeMap = {
-                'articles': 'Article',
-                'ideas': 'Idea',
-                'works': 'Work',
-                'life': 'Life',
-                'health': 'Health'
-            };
-            const className = typeMap[type];
-            const obj = AV.Object.createWithoutData(className, id);
-            await obj.destroy();
+            // 从Firestore中删除数据
+            await deleteDoc(doc(window.db, type, id));
             // 从本地数据中删除
             data[type] = data[type].filter(item => item.id !== id);
             // 重新渲染内容
@@ -784,84 +652,6 @@ function toggleTheme() {
     setTimeout(() => {
         elements.themeToggle.style.animation = '';
     }, 500);
-}
-
-// 将localStorage数据导入到LeanCloud
-async function importFromLocalStorage() {
-    try {
-        const savedData = localStorage.getItem('portfolioData');
-        if (savedData) {
-            const localStorageData = JSON.parse(savedData);
-            
-            // 导入文章
-            for (const article of localStorageData.articles || []) {
-                const Article = AV.Object.extend('Article');
-                const articleObj = new Article();
-                articleObj.set('title', article.title);
-                articleObj.set('content', article.content);
-                articleObj.set('date', article.date);
-                articleObj.set('time', article.time);
-                await articleObj.save();
-            }
-            
-            // 导入灵感
-            for (const idea of localStorageData.ideas || []) {
-                const Idea = AV.Object.extend('Idea');
-                const ideaObj = new Idea();
-                ideaObj.set('title', idea.title);
-                ideaObj.set('content', idea.content);
-                ideaObj.set('date', idea.date);
-                ideaObj.set('time', idea.time);
-                await ideaObj.save();
-            }
-            
-            // 导入作品
-            for (const work of localStorageData.works || []) {
-                const Work = AV.Object.extend('Work');
-                const workObj = new Work();
-                workObj.set('title', work.title);
-                workObj.set('description', work.description);
-                workObj.set('category', work.category);
-                workObj.set('image', work.image);
-                workObj.set('date', work.date);
-                workObj.set('time', work.time);
-                await workObj.save();
-            }
-            
-            // 导入生活
-            for (const item of localStorageData.life || []) {
-                const Life = AV.Object.extend('Life');
-                const lifeObj = new Life();
-                lifeObj.set('title', item.title);
-                lifeObj.set('content', item.content);
-                lifeObj.set('date', item.date);
-                lifeObj.set('time', item.time);
-                await lifeObj.save();
-            }
-            
-            // 导入健康
-            for (const item of localStorageData.health || []) {
-                const Health = AV.Object.extend('Health');
-                const healthObj = new Health();
-                healthObj.set('title', item.title);
-                healthObj.set('content', item.content);
-                healthObj.set('date', item.date);
-                healthObj.set('time', item.time);
-                await healthObj.save();
-            }
-            
-            console.log('localStorage数据导入成功');
-            alert('数据导入成功！');
-            // 重新加载数据
-            await loadData();
-            renderContent();
-        } else {
-            alert('localStorage中没有数据');
-        }
-    } catch (error) {
-        console.error('导入数据失败:', error);
-        alert('导入数据失败，请重试');
-    }
 }
 
 // 初始化应用
