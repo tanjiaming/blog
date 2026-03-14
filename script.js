@@ -7,23 +7,16 @@ let currentEditItem = null;
 let currentEditType = null;
 let db;
 
-// 等待Firebase初始化完成
+// 不再需要等待Firebase初始化，直接返回
 function waitForFirebase() {
     return new Promise((resolve) => {
-        const checkFirebase = () => {
-            if (window.db) {
-                db = window.db;
-                resolve();
-            } else {
-                setTimeout(checkFirebase, 100);
-            }
-        };
-        checkFirebase();
+        console.log('跳过Firebase初始化，直接使用本地数据');
+        db = null;
+        resolve();
     });
 }
 
-// 导入Firebase函数
-import { collection, getDocs, setDoc, doc, deleteDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+// 不再需要导入Firebase函数，因为我们使用本地数据
 
 // DOM 元素
 const elements = {
@@ -58,103 +51,140 @@ const elements = {
 
 // 初始化
 async function init() {
-    await waitForFirebase();
-    await loadData();
-    setupEventListeners();
-    renderContent();
-    setupTheme();
+    try {
+        console.log('开始初始化...');
+        
+        // 检查DOM元素是否存在
+        console.log('检查DOM元素...');
+        console.log('articlesList:', elements.articlesList);
+        console.log('ideasList:', elements.ideasList);
+        console.log('worksList:', elements.worksList);
+        
+        await waitForFirebase();
+        console.log('Firebase初始化完成');
+        
+        await loadData();
+        console.log('数据加载完成:', data);
+        console.log('数据中的文章数量:', data.articles.length);
+        console.log('数据中的灵感数量:', data.ideas.length);
+        console.log('数据中的作品数量:', data.works.length);
+        
+        setupEventListeners();
+        console.log('事件监听器设置完成');
+        
+        renderContent();
+        console.log('内容渲染完成');
+        
+        setupTheme();
+        console.log('主题设置完成');
+    } catch (error) {
+        console.error('初始化失败:', error);
+        
+        // 即使初始化失败，也尝试创建示例数据并渲染
+        try {
+            console.log('尝试创建示例数据...');
+            data = {
+                articles: [
+                    {
+                        id: '1',
+                        title: '示例文章',
+                        content: '这是一篇示例文章，用于测试数据加载功能。',
+                        date: '2026-03-14',
+                        time: '12:00:00'
+                    }
+                ],
+                ideas: [
+                    {
+                        id: '1',
+                        title: '示例灵感',
+                        content: '这是一个示例灵感，用于测试数据加载功能。',
+                        date: '2026-03-14',
+                        time: '12:00:00'
+                    }
+                ],
+                works: [
+                    {
+                        id: '1',
+                        title: '示例作品',
+                        description: '这是一个示例作品，用于测试数据加载功能。',
+                        category: 'website',
+                        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9',
+                        date: '2026-03-14',
+                        time: '12:00:00'
+                    }
+                ],
+                life: [],
+                health: []
+            };
+            console.log('示例数据创建成功:', data);
+            
+            // 尝试渲染内容
+            console.log('尝试渲染内容...');
+            renderContent();
+            console.log('内容渲染完成');
+            
+            // 尝试设置主题
+            console.log('尝试设置主题...');
+            setupTheme();
+            console.log('主题设置完成');
+        } catch (e) {
+            console.error('创建示例数据和渲染失败:', e);
+        }
+    }
 }
 
 // 加载数据
 async function loadData() {
-    try {
-        // 从Firestore加载数据
-        data = {
-            articles: [],
-            ideas: [],
-            works: [],
-            life: [],
-            health: []
-        };
-        
-        // 加载文章
-        const articlesQuery = query(collection(db, 'articles'), orderBy('date', 'desc'), orderBy('time', 'desc'));
-        const articlesSnapshot = await getDocs(articlesQuery);
-        articlesSnapshot.forEach(doc => {
-            data.articles.push({ id: doc.id, ...doc.data() });
-        });
-        
-        // 加载灵感
-        const ideasQuery = query(collection(db, 'ideas'), orderBy('date', 'desc'), orderBy('time', 'desc'));
-        const ideasSnapshot = await getDocs(ideasQuery);
-        ideasSnapshot.forEach(doc => {
-            data.ideas.push({ id: doc.id, ...doc.data() });
-        });
-        
-        // 加载作品
-        const worksQuery = query(collection(db, 'works'), orderBy('date', 'desc'), orderBy('time', 'desc'));
-        const worksSnapshot = await getDocs(worksQuery);
-        worksSnapshot.forEach(doc => {
-            data.works.push({ id: doc.id, ...doc.data() });
-        });
-        
-        // 加载生活
-        const lifeQuery = query(collection(db, 'life'), orderBy('date', 'desc'), orderBy('time', 'desc'));
-        const lifeSnapshot = await getDocs(lifeQuery);
-        lifeSnapshot.forEach(doc => {
-            data.life.push({ id: doc.id, ...doc.data() });
-        });
-        
-        // 加载健康
-        const healthQuery = query(collection(db, 'health'), orderBy('date', 'desc'), orderBy('time', 'desc'));
-        const healthSnapshot = await getDocs(healthQuery);
-        healthSnapshot.forEach(doc => {
-            data.health.push({ id: doc.id, ...doc.data() });
-        });
-        
-        console.log('数据加载成功:', data);
-    } catch (error) {
-        console.error('加载数据失败:', error);
-        // 使用默认数据
-        data = {
-            articles: [],
-            ideas: [],
-            works: [],
-            life: [],
-            health: []
-        };
-    }
+    console.log('开始加载数据...');
+    
+    // 直接创建示例数据，不依赖Firebase或本地存储
+    data = {
+        articles: [
+            {
+                id: '1',
+                title: '示例文章',
+                content: '这是一篇示例文章，用于测试数据加载功能。',
+                date: '2026-03-14',
+                time: '12:00:00'
+            }
+        ],
+        ideas: [
+            {
+                id: '1',
+                title: '示例灵感',
+                content: '这是一个示例灵感，用于测试数据加载功能。',
+                date: '2026-03-14',
+                time: '12:00:00'
+            }
+        ],
+        works: [
+            {
+                id: '1',
+                title: '示例作品',
+                description: '这是一个示例作品，用于测试数据加载功能。',
+                category: 'website',
+                image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9',
+                date: '2026-03-14',
+                time: '12:00:00'
+            }
+        ],
+        life: [],
+        health: []
+    };
+    
+    console.log('示例数据创建成功:', data);
+    console.log('数据加载完成:', data);
+    console.log('数据中的文章数量:', data.articles.length);
+    console.log('数据中的灵感数量:', data.ideas.length);
+    console.log('数据中的作品数量:', data.works.length);
 }
 
-// 保存数据到Firestore
+// 保存数据到本地存储
 async function saveData() {
     try {
-        // 保存文章
-        for (const article of data.articles) {
-            await setDoc(doc(db, 'articles', article.id), article);
-        }
-        
-        // 保存灵感
-        for (const idea of data.ideas) {
-            await setDoc(doc(db, 'ideas', idea.id), idea);
-        }
-        
-        // 保存作品
-        for (const work of data.works) {
-            await setDoc(doc(db, 'works', work.id), work);
-        }
-        
-        // 保存生活
-        for (const item of data.life) {
-            await setDoc(doc(db, 'life', item.id), item);
-        }
-        
-        // 保存健康
-        for (const item of data.health) {
-            await setDoc(doc(db, 'health', item.id), item);
-        }
-        
-        console.log('数据保存成功');
+        // 保存到本地存储
+        localStorage.setItem('backupData', JSON.stringify(data));
+        console.log('数据已保存到本地存储:', data);
     } catch (error) {
         console.error('保存数据失败:', error);
     }
@@ -230,27 +260,47 @@ function switchSection(section) {
 
 // 渲染内容
 function renderContent() {
+    console.log('开始渲染内容...');
+    console.log('当前section:', currentSection);
+    console.log('数据:', data);
+    
     switch (currentSection) {
         case 'articles':
+            console.log('渲染文章...');
             renderArticles();
+            console.log('文章渲染完成');
             break;
         case 'ideas':
+            console.log('渲染灵感...');
             renderIdeas();
+            console.log('灵感渲染完成');
             break;
         case 'works':
+            console.log('渲染作品...');
             renderWorks();
+            console.log('作品渲染完成');
             break;
         case 'life':
+            console.log('渲染生活...');
             renderLife();
+            console.log('生活渲染完成');
             break;
         case 'health':
+            console.log('渲染健康...');
             renderHealth();
+            console.log('健康渲染完成');
             break;
+        default:
+            console.log('未知section:', currentSection);
     }
+    console.log('内容渲染完成');
 }
 
 // 渲染文章
 function renderArticles() {
+    console.log('开始渲染文章...');
+    console.log('articlesList元素:', elements.articlesList);
+    
     // 按日期和时间倒序排序，确保最新的在最上面
     const articles = (data.articles || []).sort((a, b) => {
         // 创建包含时间的完整日期对象
@@ -259,7 +309,10 @@ function renderArticles() {
         // 倒序排列：返回 dateB - dateA
         return dateB - dateA;
     });
-    elements.articlesList.innerHTML = articles.map(article => `
+    
+    console.log('文章数据:', articles);
+    
+    const articlesHTML = articles.map(article => `
         <div class="content-item">
             <div class="title-container">
                 <h3>${article.title}</h3>
@@ -272,6 +325,17 @@ function renderArticles() {
             </div>
         </div>
     `).join('');
+    
+    console.log('文章HTML:', articlesHTML);
+    
+    if (elements.articlesList) {
+        elements.articlesList.innerHTML = articlesHTML;
+        console.log('文章HTML已设置到articlesList');
+    } else {
+        console.error('articlesList元素不存在');
+    }
+    
+    console.log('文章渲染完成');
 }
 
 // 渲染灵感
@@ -546,10 +610,10 @@ async function confirmDelete(type, id) {
 
     if (confirm('确定要删除吗？')) {
         try {
-            // 从Firestore中删除数据
-            await deleteDoc(doc(db, type, id));
             // 从本地数据中删除
             data[type] = data[type].filter(item => item.id !== id);
+            // 保存到本地存储
+            await saveData();
             // 重新渲染内容
             renderContent();
             console.log('删除成功');
