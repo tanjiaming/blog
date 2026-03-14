@@ -359,43 +359,44 @@ function saveEdit() {
     const time = now.toTimeString().split(' ')[0];
 
     if (currentEditItem) {
-        // 编辑现有项目
-        const index = data[currentEditType].findIndex(item => item.id === currentEditItem.id);
-        if (index !== -1) {
-            if (currentEditType === 'works') {
-                data[currentEditType][index] = {
-                    ...data[currentEditType][index],
-                    title,
-                    description: content,
-                    category: elements.editItemCategory.value
-                };
-            } else {
-                data[currentEditType][index] = {
-                    ...data[currentEditType][index],
-                    title,
-                    content
-                };
+            // 编辑现有项目
+            const index = data[currentEditType].findIndex(item => item.id === currentEditItem.id);
+            if (index !== -1) {
+                if (currentEditType === 'works') {
+                    data[currentEditType][index] = {
+                        ...data[currentEditType][index],
+                        title,
+                        description: content,
+                        category: elements.editItemCategory.value,
+                        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9'
+                    };
+                } else {
+                    data[currentEditType][index] = {
+                        ...data[currentEditType][index],
+                        title,
+                        content
+                    };
+                }
             }
-        }
-    } else {
-        // 添加新项目
-        const newItem = {
-            id: Date.now().toString(),
-            title,
-            date: today,
-            time: time
-        };
-
-        if (currentEditType === 'works') {
-            newItem.description = content;
-            newItem.category = elements.editItemCategory.value;
-            newItem.image = 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9';
         } else {
-            newItem.content = content;
-        }
+            // 添加新项目
+            const newItem = {
+                id: Date.now().toString(),
+                title,
+                date: today,
+                time: time
+            };
 
-        data[currentEditType].push(newItem);
-    }
+            if (currentEditType === 'works') {
+                newItem.description = content;
+                newItem.category = elements.editItemCategory.value;
+                newItem.image = 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9';
+            } else {
+                newItem.content = content;
+            }
+
+            data[currentEditType].push(newItem);
+        }
 
     // 保存数据并重新渲染
     saveData();
