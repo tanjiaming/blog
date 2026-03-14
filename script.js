@@ -6,6 +6,9 @@ let authExpiryTime = 0;
 let currentEditItem = null;
 let currentEditType = null;
 
+// 导入Firebase函数
+import { collection, getDocs, setDoc, doc, deleteDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
 // DOM 元素
 const elements = {
     navItems: document.querySelectorAll('.nav-item'),
@@ -47,21 +50,52 @@ async function init() {
 
 // 加载数据
 async function loadData() {
-    // 优先从localStorage加载数据
-    const savedData = localStorage.getItem('portfolioData');
-    if (savedData) {
-        try {
-            data = JSON.parse(savedData);
-            return;
-        } catch (error) {
-            console.error('解析localStorage数据失败:', error);
-        }
-    }
-    
-    // 如果localStorage中没有数据，从data.json加载
     try {
-        const response = await fetch('data.json');
-        data = await response.json();
+        // 从Firestore加载数据
+        data = {
+            articles: [],
+            ideas: [],
+            works: [],
+            life: [],
+            health: []
+        };
+        
+        // 加载文章
+        const articlesQuery = query(collection(window.db, 'articles'), orderBy('date', 'desc'), orderBy('time', 'desc'));
+        const articlesSnapshot = await getDocs(articlesQuery);
+        articlesSnapshot.forEach(doc => {
+            data.articles.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // 加载灵感
+        const ideasQuery = query(collection(window.db, 'ideas'), orderBy('date', 'desc'), orderBy('time', 'desc'));
+        const ideasSnapshot = await getDocs(ideasQuery);
+        ideasSnapshot.forEach(doc => {
+            data.ideas.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // 加载作品
+        const worksQuery = query(collection(window.db, 'works'), orderBy('date', 'desc'), orderBy('time', 'desc'));
+        const worksSnapshot = await getDocs(worksQuery);
+        worksSnapshot.forEach(doc => {
+            data.works.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // 加载生活
+        const lifeQuery = query(collection(window.db, 'life'), orderBy('date', 'desc'), orderBy('time', 'desc'));
+        const lifeSnapshot = await getDocs(lifeQuery);
+        lifeSnapshot.forEach(doc => {
+            data.life.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // 加载健康
+        const healthQuery = query(collection(window.db, 'health'), orderBy('date', 'desc'), orderBy('time', 'desc'));
+        const healthSnapshot = await getDocs(healthQuery);
+        healthSnapshot.forEach(doc => {
+            data.health.push({ id: doc.id, ...doc.data() });
+        });
+        
+        console.log('数据加载成功:', data);
     } catch (error) {
         console.error('加载数据失败:', error);
         // 使用默认数据
@@ -75,12 +109,38 @@ async function loadData() {
     }
 }
 
-// 保存数据
-function saveData() {
-    // 由于是本地文件，这里只是模拟保存
-    console.log('数据已保存:', data);
-    // 实际项目中可以使用localStorage或其他存储方式
-    localStorage.setItem('portfolioData', JSON.stringify(data));
+// 保存数据到Firestore
+async function saveData() {
+    try {
+        // 保存文章
+        for (const article of data.articles) {
+            await setDoc(doc(window.db, 'articles', article.id), article);
+        }
+        
+        // 保存灵感
+        for (const idea of data.ideas) {
+            await setDoc(doc(window.db, 'ideas', idea.id), idea);
+        }
+        
+        // 保存作品
+        for (const work of data.works) {
+            await setDoc(doc(window.db, 'works', work.id), work);
+        }
+        
+        // 保存生活
+        for (const item of data.life) {
+            await setDoc(doc(window.db, 'life', item.id), item);
+        }
+        
+        // 保存健康
+        for (const item of data.health) {
+            await setDoc(doc(window.db, 'health', item.id), item);
+        }
+        
+        console.log('数据保存成功');
+    } catch (error) {
+        console.error('保存数据失败:', error);
+    }
 }
 
 // 设置事件监听器
@@ -383,7 +443,7 @@ function closeEditModal() {
 }
 
 // 保存编辑
-function saveEdit() {
+async function saveEdit() {
     const title = elements.editItemTitle.value.trim();
     const content = elements.editItemContent.value.trim();
 
@@ -397,70 +457,70 @@ function saveEdit() {
     const time = now.toTimeString().split(' ')[0];
 
     // 处理图片上传
-        let imageUrl = currentEditItem?.image;
-        if (currentEditType === 'works' && elements.editItemImage.files.length > 0) {
-            // 使用FileReader读取上传的图片
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imageUrl = e.target.result;
-                saveItemWithImage(imageUrl);
-            };
-            reader.readAsDataURL(elements.editItemImage.files[0]);
-            return;
-        }
-        
-        saveItemWithImage(imageUrl);
-        
-        function saveItemWithImage(imageUrl) {
-            if (currentEditItem) {
-                // 编辑现有项目
-                const index = data[currentEditType].findIndex(item => item.id === currentEditItem.id);
-                if (index !== -1) {
-                    if (currentEditType === 'works') {
-                        data[currentEditType][index] = {
-                            ...data[currentEditType][index],
-                            title,
-                            description: content,
-                            category: elements.editItemCategory.value,
-                            image: imageUrl || 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9'
-                        };
-                    } else {
-                        data[currentEditType][index] = {
-                            ...data[currentEditType][index],
-                            title,
-                            content
-                        };
-                    }
-                }
-            } else {
-                // 添加新项目
-                const newItem = {
-                    id: Date.now().toString(),
-                    title,
-                    date: today,
-                    time: time
-                };
-
+    let imageUrl = currentEditItem?.image;
+    if (currentEditType === 'works' && elements.editItemImage.files.length > 0) {
+        // 使用FileReader读取上传的图片
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            imageUrl = e.target.result;
+            await saveItemWithImage(imageUrl);
+        };
+        reader.readAsDataURL(elements.editItemImage.files[0]);
+        return;
+    }
+    
+    await saveItemWithImage(imageUrl);
+    
+    async function saveItemWithImage(imageUrl) {
+        if (currentEditItem) {
+            // 编辑现有项目
+            const index = data[currentEditType].findIndex(item => item.id === currentEditItem.id);
+            if (index !== -1) {
                 if (currentEditType === 'works') {
-                    newItem.description = content;
-                    newItem.category = elements.editItemCategory.value;
-                    newItem.image = imageUrl || 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9';
+                    data[currentEditType][index] = {
+                        ...data[currentEditType][index],
+                        title,
+                        description: content,
+                        category: elements.editItemCategory.value,
+                        image: imageUrl || 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9'
+                    };
                 } else {
-                    newItem.content = content;
+                    data[currentEditType][index] = {
+                        ...data[currentEditType][index],
+                        title,
+                        content
+                    };
                 }
+            }
+        } else {
+            // 添加新项目
+            const newItem = {
+                id: Date.now().toString(),
+                title,
+                date: today,
+                time: time
+            };
 
-                data[currentEditType].push(newItem);
+            if (currentEditType === 'works') {
+                newItem.description = content;
+                newItem.category = elements.editItemCategory.value;
+                newItem.image = imageUrl || 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9';
+            } else {
+                newItem.content = content;
             }
 
-            // 保存数据并重新渲染
-            saveData();
-            renderContent();
-            closeEditModal();
+            data[currentEditType].push(newItem);
         }
+
+        // 保存数据并重新渲染
+        await saveData();
+        renderContent();
+        closeEditModal();
+    }
 }
 
 // 确认删除
-function confirmDelete(type, id) {
+async function confirmDelete(type, id) {
     // 如果未认证或认证已过期，先验证密码
     if (!checkAuth()) {
         openPasswordModal(() => confirmDelete(type, id));
@@ -468,9 +528,18 @@ function confirmDelete(type, id) {
     }
 
     if (confirm('确定要删除吗？')) {
-        data[type] = data[type].filter(item => item.id !== id);
-        saveData();
-        renderContent();
+        try {
+            // 从Firestore中删除数据
+            await deleteDoc(doc(window.db, type, id));
+            // 从本地数据中删除
+            data[type] = data[type].filter(item => item.id !== id);
+            // 重新渲染内容
+            renderContent();
+            console.log('删除成功');
+        } catch (error) {
+            console.error('删除失败:', error);
+            alert('删除失败，请重试');
+        }
     }
 }
 
