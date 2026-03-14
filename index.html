@@ -5,27 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>谈家鸣 - 记录生活与思考</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Firebase SDK -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDF4n4NK9btE9aFc3fLjLpvpAj0yctIpek",
-            authDomain: "myblog-ce35c.firebaseapp.com",
-            projectId: "myblog-ce35c",
-            storageBucket: "myblog-ce35c.firebasestorage.app",
-            messagingSenderId: "610123686978",
-            appId: "1:610123686978:web:665cb7e918acc3f90fb9db"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        // 将db对象暴露给全局作用域，以便script.js使用
-        window.db = db;
+    <!-- LeanCloud SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
+    <script>
+        // 初始化 LeanCloud
+        const APP_ID = 'your-app-id'; // 替换为您的 App ID
+        const APP_KEY = 'your-app-key'; // 替换为您的 App Key
+        AV.init({ appId: APP_ID, appKey: APP_KEY });
+        // 将 AV 对象暴露给全局作用域，以便 script.js 使用
+        window.AV = AV;
     </script>
 </head>
 <body>
@@ -178,6 +166,6 @@
         </div>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
