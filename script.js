@@ -47,6 +47,18 @@ async function init() {
 
 // 加载数据
 async function loadData() {
+    // 优先从localStorage加载数据
+    const savedData = localStorage.getItem('portfolioData');
+    if (savedData) {
+        try {
+            data = JSON.parse(savedData);
+            return;
+        } catch (error) {
+            console.error('解析localStorage数据失败:', error);
+        }
+    }
+    
+    // 如果localStorage中没有数据，从data.json加载
     try {
         const response = await fetch('data.json');
         data = await response.json();
