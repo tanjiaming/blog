@@ -174,9 +174,12 @@ function renderContent() {
 
 // 渲染文章
 function renderArticles() {
+    // 按日期和时间倒序排序，确保最新的在最上面
     const articles = (data.articles || []).sort((a, b) => {
+        // 创建包含时间的完整日期对象
         const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
         const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
+        // 倒序排列：返回 dateB - dateA
         return dateB - dateA;
     });
     elements.articlesList.innerHTML = articles.map(article => `
@@ -196,9 +199,12 @@ function renderArticles() {
 
 // 渲染灵感
 function renderIdeas() {
+    // 按日期和时间倒序排序，确保最新的在最上面
     const ideas = (data.ideas || []).sort((a, b) => {
+        // 创建包含时间的完整日期对象
         const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
         const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
+        // 倒序排列：返回 dateB - dateA
         return dateB - dateA;
     });
     elements.ideasList.innerHTML = ideas.map(idea => `
@@ -390,50 +396,67 @@ function saveEdit() {
     const today = now.toISOString().split('T')[0];
     const time = now.toTimeString().split(' ')[0];
 
-    if (currentEditItem) {
-            // 编辑现有项目
-            const index = data[currentEditType].findIndex(item => item.id === currentEditItem.id);
-            if (index !== -1) {
-                if (currentEditType === 'works') {
-                    data[currentEditType][index] = {
-                        ...data[currentEditType][index],
-                        title,
-                        description: content,
-                        category: elements.editItemCategory.value,
-                        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9'
-                    };
-                } else {
-                    data[currentEditType][index] = {
-                        ...data[currentEditType][index],
-                        title,
-                        content
-                    };
-                }
-            }
-        } else {
-            // 添加新项目
-            const newItem = {
-                id: Date.now().toString(),
-                title,
-                date: today,
-                time: time
+    // 处理图片上传
+        let imageUrl = currentEditItem?.image;
+        if (currentEditType === 'works' && elements.editItemImage.files.length > 0) {
+            // 使用FileReader读取上传的图片
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imageUrl = e.target.result;
+                saveItemWithImage(imageUrl);
             };
-
-            if (currentEditType === 'works') {
-                newItem.description = content;
-                newItem.category = elements.editItemCategory.value;
-                newItem.image = 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9';
+            reader.readAsDataURL(elements.editItemImage.files[0]);
+            return;
+        }
+        
+        saveItemWithImage(imageUrl);
+        
+        function saveItemWithImage(imageUrl) {
+            if (currentEditItem) {
+                // 编辑现有项目
+                const index = data[currentEditType].findIndex(item => item.id === currentEditItem.id);
+                if (index !== -1) {
+                    if (currentEditType === 'works') {
+                        data[currentEditType][index] = {
+                            ...data[currentEditType][index],
+                            title,
+                            description: content,
+                            category: elements.editItemCategory.value,
+                            image: imageUrl || 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9'
+                        };
+                    } else {
+                        data[currentEditType][index] = {
+                            ...data[currentEditType][index],
+                            title,
+                            content
+                        };
+                    }
+                }
             } else {
-                newItem.content = content;
+                // 添加新项目
+                const newItem = {
+                    id: Date.now().toString(),
+                    title,
+                    date: today,
+                    time: time
+                };
+
+                if (currentEditType === 'works') {
+                    newItem.description = content;
+                    newItem.category = elements.editItemCategory.value;
+                    newItem.image = imageUrl || 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9';
+                } else {
+                    newItem.content = content;
+                }
+
+                data[currentEditType].push(newItem);
             }
 
-            data[currentEditType].push(newItem);
+            // 保存数据并重新渲染
+            saveData();
+            renderContent();
+            closeEditModal();
         }
-
-    // 保存数据并重新渲染
-    saveData();
-    renderContent();
-    closeEditModal();
 }
 
 // 确认删除
