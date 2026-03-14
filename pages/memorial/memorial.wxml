@@ -1,0 +1,30 @@
+<view class="container">
+  <view class="form-item">
+    <text class="label">宠物姓名</text>
+    <input class="input" placeholder="请输入宠物姓名" bindinput="bindNameInput"></input>
+  </view>
+  <view class="form-item">
+    <text class="label">出生日期</text>
+    <picker mode="date" class="picker" bindchange="bindBirthChange" value="{{birthDate}}">
+      <view class="picker-text">{{birthDate || '选择日期'}}</view>
+    </picker>
+  </view>
+  <view class="form-item">
+    <text class="label">离世日期</text>
+    <picker mode="date" class="picker" bindchange="bindDeathChange" value="{{deathDate}}">
+      <view class="picker-text">{{deathDate || '选择日期'}}</view>
+    </picker>
+  </view>
+  <view class="form-item">
+    <text class="label">纪念留言</text>
+    <textarea class="textarea" placeholder="请写下对宠物的思念..." bindinput="bindMessageInput"></textarea>
+  </view>
+  <view class="form-item">
+    <text class="label">上传照片</text>
+    <view class="upload-area" bindtap="chooseImage">
+      <image src="{{imageUrl || '/images/upload.png'}}" class="upload-img"></image>
+      <text class="upload-text">{{imageUrl ? '点击更换照片' : '点击上传照片'}}</text>
+    </view>
+  </view>
+  <button class="save-btn" bindtap="saveMemorial">保存纪念空间</button>
+</view>

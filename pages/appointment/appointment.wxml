@@ -1,0 +1,28 @@
+<view class="container">
+  <view class="form-item">
+    <text class="label">宠物姓名</text>
+    <input class="input" placeholder="请输入宠物姓名" bindinput="bindNameInput"></input>
+  </view>
+  <view class="form-item">
+    <text class="label">宠物类型</text>
+    <picker class="picker" bindchange="bindTypeChange" value="{{petTypeIndex}}" range="{{petTypes}}">
+      <view class="picker-text">{{petTypes[petTypeIndex]}}</view>
+    </picker>
+  </view>
+  <view class="form-item">
+    <text class="label">预约日期</text>
+    <picker mode="date" class="picker" bindchange="bindDateChange" value="{{date}}">
+      <view class="picker-text">{{date}}</view>
+    </picker>
+  </view>
+  <view class="form-item">
+    <text class="label">服务类型</text>
+    <radio-group class="radio-group" bindchange="bindServiceChange">
+      <label class="radio-label" wx:for="{{services}}" wx:key="index">
+        <radio value="{{item.value}}" checked="{{index === 0}}"/>
+        <text>{{item.name}}</text>
+      </label>
+    </radio-group>
+  </view>
+  <button class="submit-btn" bindtap="submitAppointment">提交预约</button>
+</view>

@@ -1,0 +1,16 @@
+<view class="container">
+  <view class="header">
+    <text class="title">宠物电子墓地</text>
+    <text class="subtitle">给毛孩子最后的温暖</text>
+  </view>
+  <view class="btn-group">
+    <navigator url="/pages/appointment/appointment" class="btn">
+      <image src="/images/appointment.svg" class="btn-icon"></image>
+      <text>预约殡葬服务</text>
+    </navigator>
+    <navigator url="/pages/memorial/memorial" class="btn">
+      <image src="/images/memorial.png" class="btn-icon"></image>
+      <text>创建纪念空间</text>
+    </navigator>
+  </view>
+</view>

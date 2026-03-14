@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>谈家鸣 - 记录生活与思考</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>谈家鸣</h1>
+                <p>记录生活与思考</p>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active" data-section="articles">
+                        <span class="nav-icon">📝</span>
+                        <span class="nav-text">文章</span>
+                    </li>
+                    <li class="nav-item" data-section="ideas">
+                        <span class="nav-icon">💡</span>
+                        <span class="nav-text">灵感</span>
+                    </li>
+                    <li class="nav-item" data-section="works">
+                        <span class="nav-icon">🎨</span>
+                        <span class="nav-text">作品</span>
+                    </li>
+                    <li class="nav-item" data-section="life">
+                        <span class="nav-icon">🌱</span>
+                        <span class="nav-text">生活</span>
+                    </li>
+                    <li class="nav-item" data-section="health">
+                        <span class="nav-icon">🏃</span>
+                        <span class="nav-text">健康</span>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部栏 -->
+            <header class="top-bar">
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="搜索...">
+                    <button id="search-btn">🔍</button>
+                </div>
+                <div class="top-bar-actions">
+                    <button id="theme-toggle">🌙</button>
+                </div>
+            </header>
+
+            <!-- 内容区域 -->
+            <div class="content-area">
+                <!-- 文章区域 -->
+                <section id="articles-section" class="section active">
+                    <div class="section-header">
+                        <h2>文章</h2>
+                        <p>记录学习与思考</p>
+                        <button class="add-btn" id="add-article">+ 写文章</button>
+                    </div>
+                    <div class="content-list" id="articles-list">
+                        <!-- 文章列表将通过JavaScript动态生成 -->
+                    </div>
+                </section>
+
+                <!-- 灵感区域 -->
+                <section id="ideas-section" class="section">
+                    <div class="section-header">
+                        <h2>灵感</h2>
+                        <p>捕捉瞬间的创意</p>
+                        <button class="add-btn" id="add-idea">+ 写想法</button>
+                    </div>
+                    <div class="content-list" id="ideas-list">
+                        <!-- 灵感列表将通过JavaScript动态生成 -->
+                    </div>
+                </section>
+
+                <!-- 作品区域 -->
+                <section id="works-section" class="section">
+                    <div class="section-header">
+                        <h2>作品</h2>
+                        <p>展示创作成果</p>
+                        <button class="add-btn" id="add-work">+ 上传作品</button>
+                    </div>
+                    <div class="work-categories">
+                        <button class="category-btn active" data-category="all">全部</button>
+                        <button class="category-btn" data-category="website">网站</button>
+                        <button class="category-btn" data-category="app">App</button>
+                        <button class="category-btn" data-category="mini-program">小程序</button>
+                    </div>
+                    <div class="content-list works-list" id="works-list">
+                        <!-- 作品列表将通过JavaScript动态生成 -->
+                    </div>
+                </section>
+
+                <!-- 生活区域 -->
+                <section id="life-section" class="section">
+                    <div class="section-header">
+                        <h2>生活</h2>
+                        <p>记录生活点滴</p>
+                    </div>
+                    <div class="content-list" id="life-list">
+                        <!-- 生活内容将通过JavaScript动态生成 -->
+                    </div>
+                </section>
+
+                <!-- 健康区域 -->
+                <section id="health-section" class="section">
+                    <div class="section-header">
+                        <h2>健康</h2>
+                        <p>关注身心健康</p>
+                    </div>
+                    <div class="content-list" id="health-list">
+                        <!-- 健康内容将通过JavaScript动态生成 -->
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- 密码验证模态框 -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <h3>请输入密码</h3>
+            <input type="password" id="password-input" placeholder="输入密码">
+            <div class="modal-buttons">
+                <button id="password-confirm">确认</button>
+                <button id="password-cancel">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑模态框 -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="edit-title">编辑内容</h3>
+            <input type="text" id="edit-item-title" placeholder="标题">
+            <textarea id="edit-item-content" placeholder="内容"></textarea>
+            <div id="work-specific" style="display: none;">
+                <input type="file" id="edit-item-image" accept="image/*">
+                <select id="edit-item-category">
+                    <option value="website">网站</option>
+                    <option value="app">App</option>
+                    <option value="mini-program">小程序</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button id="edit-confirm">保存</button>
+                <button id="edit-cancel">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

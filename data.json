@@ -1,0 +1,72 @@
+{
+  "articles": [
+    {
+      "id": "1",
+      "title": "关于AI的思考",
+      "content": "人工智能的发展速度超出了很多人的预期，它正在改变我们的生活和工作方式。从语音助手到自动驾驶，AI的应用越来越广泛。我们需要思考如何更好地利用AI，同时避免其潜在的风险。",
+      "date": "2026-03-10"
+    },
+    {
+      "id": "2",
+      "title": "前端开发的未来",
+      "content": "前端开发技术在不断演进，从传统的HTML/CSS/JavaScript到现代的框架和工具，前端开发变得越来越复杂和强大。未来，前端开发将更加注重用户体验和性能优化。",
+      "date": "2026-03-08"
+    }
+  ],
+  "ideas": [
+    {
+      "id": "1",
+      "title": "创意灵感",
+      "content": "有时候创意来自于日常生活中的小细节，我们需要保持敏锐的观察力，善于发现生活中的美好。",
+      "date": "2026-03-09"
+    },
+    {
+      "id": "2",
+      "title": "学习方法",
+      "content": "有效的学习方法是提高学习效率的关键，我们应该找到适合自己的学习方式，不断调整和优化。",
+      "date": "2026-03-07"
+    }
+  ],
+  "works": [
+    {
+      "id": "1",
+      "title": "个人 portfolio 网站",
+      "description": "一个展示个人作品和技能的网站，使用现代前端技术构建。",
+      "image": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20personal%20portfolio%20website%20design&image_size=landscape_16_9",
+      "category": "website",
+      "date": "2026-03-05"
+    },
+    {
+      "id": "2",
+      "title": "任务管理 App",
+      "description": "一个帮助用户管理日常任务的移动应用，具有简洁的界面和实用的功能。",
+      "image": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=task%20management%20mobile%20app%20interface&image_size=portrait_4_3",
+      "category": "app",
+      "date": "2026-03-03"
+    },
+    {
+      "id": "3",
+      "title": "宠物记忆小程序",
+      "description": "一个记录宠物成长点滴的小程序，让用户可以分享宠物的美好时光。",
+      "image": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=pet%20memory%20mini%20program%20interface&image_size=portrait_4_3",
+      "category": "mini-program",
+      "date": "2026-03-01"
+    }
+  ],
+  "life": [
+    {
+      "id": "1",
+      "title": "周末旅行",
+      "content": "周末和朋友一起去了郊外旅行，享受了大自然的美景，放松了心情。",
+      "date": "2026-03-06"
+    }
+  ],
+  "health": [
+    {
+      "id": "1",
+      "title": "健康饮食",
+      "content": "保持健康的饮食习惯对身体非常重要，我们应该多吃蔬菜水果，少吃油腻食物。",
+      "date": "2026-03-04"
+    }
+  ]
+}
