@@ -54,6 +54,9 @@ const elements = {
     addArticleBtn: document.getElementById('add-article'),
     addIdeaBtn: document.getElementById('add-idea'),
     addWorkBtn: document.getElementById('add-work'),
+    addLifeBtn: document.getElementById('add-life-btn'),
+    addHealthBtn: document.getElementById('add-health'),
+    lifeInput: document.getElementById('life-input'),
     passwordModal: document.getElementById('password-modal'),
     passwordInput: document.getElementById('password-input'),
     passwordConfirm: document.getElementById('password-confirm'),
@@ -67,6 +70,9 @@ const elements = {
     workSpecific: document.getElementById('work-specific'),
     editConfirm: document.getElementById('edit-confirm'),
     editCancel: document.getElementById('edit-cancel'),
+    deleteModal: document.getElementById('delete-modal'),
+    deleteConfirm: document.getElementById('delete-confirm'),
+    deleteCancel: document.getElementById('delete-cancel'),
     categoryBtns: document.querySelectorAll('.category-btn'),
     articlesList: document.getElementById('articles-list'),
     ideasList: document.getElementById('ideas-list'),
@@ -83,8 +89,15 @@ async function loadDataFromAPI() {
         if (response.ok) {
             const apiData = await response.json();
             console.log('从API加载的数据:', apiData);
-            data = apiData;
-            console.log('从API加载数据完成');
+            // 确保数据结构正确
+            data = {
+                articles: apiData.articles || [],
+                ideas: apiData.ideas || [],
+                works: apiData.works || [],
+                life: apiData.life || [],
+                health: apiData.health || []
+            };
+            console.log('从API加载数据完成，作品数量:', data.works.length);
             return true;
         } else {
             console.log('API加载失败，尝试从本地存储加载');
@@ -203,6 +216,15 @@ function setupEventListeners() {
     elements.addArticleBtn.addEventListener('click', () => openEditModal('articles'));
     elements.addIdeaBtn.addEventListener('click', () => openEditModal('ideas'));
     elements.addWorkBtn.addEventListener('click', () => openEditModal('works'));
+    elements.addLifeBtn.addEventListener('click', addLifeItem);
+    elements.addHealthBtn.addEventListener('click', () => openEditModal('health'));
+    
+    // 生活事项输入框回车事件
+    elements.lifeInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            addLifeItem();
+        }
+    });
 
     // 密码模态框
     elements.passwordConfirm.addEventListener('click', verifyPassword);
@@ -211,6 +233,10 @@ function setupEventListeners() {
     // 编辑模态框
     elements.editConfirm.addEventListener('click', saveEdit);
     elements.editCancel.addEventListener('click', closeEditModal);
+    
+    // 删除确认模态框
+    elements.deleteConfirm.addEventListener('click', performDelete);
+    elements.deleteCancel.addEventListener('click', closeDeleteModal);
 
     // 作品分类
     elements.categoryBtns.forEach(btn => {
@@ -381,8 +407,48 @@ function renderWorks() {
     `).join('');
 }
 
+// 添加生活事项
+function addLifeItem() {
+    const input = elements.lifeInput;
+    const text = input.value.trim();
+    
+    if (!text) {
+        return;
+    }
+    
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    const time = now.toTimeString().split(' ')[0];
+    
+    const newItem = {
+        id: Date.now().toString(),
+        title: text,
+        content: text,
+        date: today,
+        time: time,
+        emoji: '📝',
+        completed: false
+    };
+    
+    data.life.push(newItem);
+    saveData();
+    renderLife();
+    input.value = '';
+}
+
+// 切换生活事项完成状态
+function toggleLifeItemCompleted(id) {
+    const lifeItem = data.life.find(item => item.id === id);
+    if (lifeItem) {
+        lifeItem.completed = !lifeItem.completed;
+        saveData();
+        renderLife();
+    }
+}
+
 // 渲染生活
 function renderLife() {
+    // 按日期和时间倒序排序，确保最新的在最上面
     const life = (data.life || []).sort((a, b) => {
         const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
         const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
@@ -390,29 +456,75 @@ function renderLife() {
     });
     elements.lifeList.innerHTML = life.map(item => `
         <div class="content-item">
-            <div class="title-container">
-                <h3>${item.title}</h3>
-                <span class="title-time">${item.date}</span>
+            <div class="life-item">
+                <div class="life-checkbox">
+                    <input type="checkbox" ${item.completed ? 'checked' : ''} onchange="toggleLifeItemCompleted('${item.id}')">
+                </div>
+                <div class="life-content">
+                    <div class="life-emoji">${item.emoji || '📝'}</div>
+                    <div class="life-details">
+                        <div class="title-container">
+                            <h3 ${item.completed ? 'class="completed"' : ''}>${item.title}</h3>
+                            <span class="title-time">${item.date} ${item.time || ''}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="action-btn edit-btn" onclick="openEditModal('life', '${item.id}')">编辑</button>
+                    <button class="action-btn delete-btn" onclick="confirmDelete('life', '${item.id}')">删除</button>
+                </div>
             </div>
-            <p>${item.content}</p>
         </div>
     `).join('');
 }
 
 // 渲染健康
 function renderHealth() {
-    const health = (data.health || []).sort((a, b) => {
+    let health = (data.health || []).sort((a, b) => {
         const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
         const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
         return dateB - dateA;
     });
+    
+    // 如果没有健康文章，添加3篇推荐文章
+    if (health.length === 0) {
+        const recommendedArticles = [
+            {
+                id: '1',
+                title: '每天8杯水，健康生活的基础',
+                content: '水是生命之源，每天喝足8杯水有助于维持身体的正常代谢，促进排毒，保持皮肤水润。建议早上起床后喝一杯温水，帮助唤醒身体机能。',
+                date: '2026-03-15',
+                time: '08:00:00'
+            },
+            {
+                id: '2',
+                title: '适量运动，增强体质',
+                content: '每周至少进行150分钟的中等强度有氧运动，如快走、游泳、骑自行车等。运动不仅能增强心肺功能，还能缓解压力，提高睡眠质量。',
+                date: '2026-03-14',
+                time: '18:30:00'
+            },
+            {
+                id: '3',
+                title: '健康饮食，均衡营养',
+                content: '多吃蔬菜水果，适量摄入蛋白质和碳水化合物，减少油腻和高热量食物的摄入。保持饮食的多样性，确保身体获得全面的营养。',
+                date: '2026-03-13',
+                time: '12:00:00'
+            }
+        ];
+        health = recommendedArticles;
+    }
+    
     elements.healthList.innerHTML = health.map(item => `
         <div class="content-item">
             <div class="title-container">
                 <h3>${item.title}</h3>
-                <span class="title-time">${item.date}</span>
+                <span class="title-time">${item.date} ${item.time || ''}</span>
             </div>
             <p>${item.content}</p>
+            <div class="actions">
+                <button class="action-btn edit-btn" onclick="openEditModal('health', '${item.id}')">编辑</button>
+                <button class="action-btn delete-btn" onclick="confirmDelete('health', '${item.id}')">删除</button>
+            </div>
         </div>
     `).join('');
 }
@@ -527,15 +639,44 @@ async function saveEdit() {
 
     // 处理图片上传
     let imageUrl = currentEditItem?.image;
+    
+    // 如果用户上传了图片，使用我们的上传API
     if (currentEditType === 'works' && elements.editItemImage.files.length > 0) {
-        // 使用FileReader读取上传的图片
-        const reader = new FileReader();
-        reader.onload = async function(e) {
-            imageUrl = e.target.result;
-            await saveItemWithImage(imageUrl);
-        };
-        reader.readAsDataURL(elements.editItemImage.files[0]);
-        return;
+        // 获取上传的图片文件
+        const file = elements.editItemImage.files[0];
+        // 创建FormData对象
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        try {
+            // 调用上传API
+            const response = await fetch('http://localhost:3001/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
+                    imageUrl = result.imageUrl;
+                } else {
+                    console.error('上传失败:', result.error);
+                    alert('图片上传失败，请重试');
+                    return;
+                }
+            } else {
+                console.error('上传失败，服务器返回错误');
+                alert('图片上传失败，请重试');
+                return;
+            }
+        } catch (error) {
+            console.error('上传失败:', error);
+            alert('图片上传失败，请重试');
+            return;
+        }
+    } else if (currentEditType === 'works' && !imageUrl) {
+        // 使用默认图片URL
+        imageUrl = 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9';
     }
     
     await saveItemWithImage(imageUrl);
@@ -576,6 +717,11 @@ async function saveEdit() {
                 newItem.image = imageUrl || 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9';
             } else {
                 newItem.content = content;
+                // 为生活事项添加默认emoji
+                if (currentEditType === 'life' && !newItem.emoji) {
+                    newItem.emoji = '📝';
+                    newItem.completed = false;
+                }
             }
 
             data[currentEditType].push(newItem);
@@ -618,28 +764,56 @@ async function saveData() {
     }
 }
 
-// 确认删除
-async function confirmDelete(type, id) {
+// 全局变量，用于存储待删除的项目信息
+let currentDeleteType = null;
+let currentDeleteId = null;
+
+// 打开删除确认模态框
+function openDeleteModal(type, id) {
     // 如果未认证或认证已过期，先验证密码
     if (!checkAuth()) {
-        openPasswordModal(() => confirmDelete(type, id));
+        openPasswordModal(() => openDeleteModal(type, id));
         return;
     }
+    
+    currentDeleteType = type;
+    currentDeleteId = id;
+    elements.deleteModal.classList.add('show');
+}
 
-    if (confirm('确定要删除吗？')) {
-        try {
-            // 从本地数据中删除
-            data[type] = data[type].filter(item => item.id !== id);
-            // 保存到本地存储
-            await saveData();
-            // 重新渲染内容
-            renderContent();
-            console.log('删除成功');
-        } catch (error) {
-            console.error('删除失败:', error);
-            alert('删除失败，请重试');
-        }
+// 关闭删除确认模态框
+function closeDeleteModal() {
+    elements.deleteModal.classList.remove('show');
+    currentDeleteType = null;
+    currentDeleteId = null;
+}
+
+// 执行删除操作
+async function performDelete() {
+    if (!currentDeleteType || !currentDeleteId) {
+        return;
     }
+    
+    try {
+        // 从本地数据中删除
+        data[currentDeleteType] = data[currentDeleteType].filter(item => item.id !== currentDeleteId);
+        // 保存到本地存储
+        await saveData();
+        // 重新渲染内容
+        renderContent();
+        console.log('删除成功');
+        // 关闭模态框
+        closeDeleteModal();
+    } catch (error) {
+        console.error('删除失败:', error);
+        alert('删除失败，请重试');
+        closeDeleteModal();
+    }
+}
+
+// 确认删除（打开模态框）
+function confirmDelete(type, id) {
+    openDeleteModal(type, id);
 }
 
 // 执行搜索

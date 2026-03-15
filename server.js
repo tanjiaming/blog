@@ -2,13 +2,22 @@
 const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
+const fileUpload = require('express-fileupload');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// 使用文件上传中间件
+app.use(fileUpload());
+
 // 中间件
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // 增加请求体大小限制
+app.use(express.urlencoded({ limit: '10mb', extended: true })); // 增加URL编码请求体大小限制
+
+// 静态文件服务
+app.use(express.static('.'));
+app.use('/images', express.static('images'));
 
 // TDSQL-C数据库连接配置
 const dbConfig = {
@@ -71,6 +80,9 @@ async function createTables() {
   try {
     const connection = await pool.getConnection();
     
+    // 不再删除旧表，确保历史数据不会丢失
+    console.log('保留现有表结构，确保历史数据不丢失');
+    
     // 创建文章表
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS articles (
@@ -113,7 +125,9 @@ async function createTables() {
         title VARCHAR(255) NOT NULL,
         content TEXT NOT NULL,
         date DATE NOT NULL,
-        time VARCHAR(8) NOT NULL
+        time VARCHAR(8) NOT NULL,
+        completed BOOLEAN DEFAULT FALSE,
+        emoji VARCHAR(10) DEFAULT '📝'
       )
     `);
     
@@ -135,34 +149,102 @@ async function createTables() {
   }
 }
 
+// 图片上传API
+const fs = require('fs');
+const path = require('path');
+
+app.post('/api/upload', (req, res) => {
+  try {
+    if (!req.files || !req.files.image) {
+      return res.status(400).json({ error: '没有上传图片' });
+    }
+
+    const image = req.files.image;
+    const fileName = `${Date.now()}-${image.name}`;
+    const filePath = path.join(__dirname, 'images', fileName);
+
+    // 保存图片
+    image.mv(filePath, (err) => {
+      if (err) {
+        console.error('保存图片失败:', err);
+        return res.status(500).json({ error: '保存图片失败' });
+      }
+
+      // 返回图片URL
+      const imageUrl = `/images/${fileName}`;
+      res.json({ success: true, imageUrl });
+    });
+  } catch (error) {
+    console.error('上传图片失败:', error);
+    res.status(500).json({ error: '上传图片失败' });
+  }
+});
+
 // API接口：获取所有数据
 app.get('/api/data', async (req, res) => {
   try {
     const connection = await pool.getConnection();
     
+    // 辅助函数：格式化日期
+    function formatDate(date) {
+      if (!date) return null;
+      // 如果是Date对象，转换为YYYY-MM-DD格式
+      if (date instanceof Date) {
+        return date.toISOString().split('T')[0];
+      }
+      // 如果是字符串，确保是YYYY-MM-DD格式
+      if (typeof date === 'string') {
+        if (date.includes('T')) {
+          return date.split('T')[0];
+        }
+        return date;
+      }
+      return date;
+    }
+    
     // 获取文章
     const [articles] = await connection.execute('SELECT * FROM articles ORDER BY date DESC, time DESC');
+    const formattedArticles = articles.map(article => ({
+      ...article,
+      date: formatDate(article.date)
+    }));
     
     // 获取灵感
     const [ideas] = await connection.execute('SELECT * FROM ideas ORDER BY date DESC, time DESC');
+    const formattedIdeas = ideas.map(idea => ({
+      ...idea,
+      date: formatDate(idea.date)
+    }));
     
     // 获取作品
     const [works] = await connection.execute('SELECT * FROM works ORDER BY date DESC, time DESC');
+    const formattedWorks = works.map(work => ({
+      ...work,
+      date: formatDate(work.date)
+    }));
     
     // 获取生活
     const [life] = await connection.execute('SELECT * FROM life ORDER BY date DESC, time DESC');
+    const formattedLife = life.map(lifeItem => ({
+      ...lifeItem,
+      date: formatDate(lifeItem.date)
+    }));
     
     // 获取健康
     const [health] = await connection.execute('SELECT * FROM health ORDER BY date DESC, time DESC');
+    const formattedHealth = health.map(healthItem => ({
+      ...healthItem,
+      date: formatDate(healthItem.date)
+    }));
     
     connection.release();
     
     res.json({
-      articles,
-      ideas,
-      works,
-      life,
-      health
+      articles: formattedArticles,
+      ideas: formattedIdeas,
+      works: formattedWorks,
+      life: formattedLife,
+      health: formattedHealth
     });
   } catch (error) {
     console.error('获取数据失败:', error);
@@ -224,8 +306,8 @@ app.post('/api/data', async (req, res) => {
       // 插入生活
       for (const lifeItem of life) {
         await connection.execute(
-          'INSERT INTO life (id, title, content, date, time) VALUES (?, ?, ?, ?, ?)',
-          [lifeItem.id, lifeItem.title, lifeItem.content, formatDate(lifeItem.date), lifeItem.time]
+          'INSERT INTO life (id, title, content, date, time, completed, emoji) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [lifeItem.id, lifeItem.title, lifeItem.content, formatDate(lifeItem.date), lifeItem.time, lifeItem.completed || false, lifeItem.emoji || '📝']
         );
       }
       

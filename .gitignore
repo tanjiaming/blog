@@ -1,0 +1,23 @@
+# 依赖文件
+node_modules/
+
+# 环境变量文件
+.env
+
+# 日志文件
+*.log
+
+# 图片目录（可选，取决于你是否想将图片提交到GitHub）
+# images/
+
+# 临时文件
+*.tmp
+*.temp
+
+# 编辑器配置文件
+.vscode/
+.idea/
+
+# 操作系统文件
+.DS_Store
+Thumbs.db

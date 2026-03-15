@@ -595,6 +595,100 @@ body.light-mode .content-item .meta {
     gap: 10px;
 }
 
+/* 添加生活事项输入框 */
+.add-life-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+#life-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(20px);
+}
+
+body.dark-mode #life-input {
+    background: rgba(16, 18, 27, 0.9);
+    border-color: rgba(66, 153, 225, 0.15);
+    color: #e6f1ff;
+}
+
+body.light-mode #life-input {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(66, 153, 225, 0.2);
+    color: #333333;
+}
+
+#life-input:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+#add-life-btn {
+    padding: 12px 20px;
+    border: 1px solid #4299e1;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(66, 153, 225, 0.1);
+    color: #4299e1;
+}
+
+#add-life-btn:hover {
+    background: rgba(66, 153, 225, 0.2);
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    transform: translateY(-1px);
+}
+
+/* 生活事项样式 */
+.life-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.life-checkbox {
+    margin-top: 4px;
+}
+
+.life-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.life-content {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.life-emoji {
+    font-size: 24px;
+    margin-top: 2px;
+}
+
+.life-details {
+    flex: 1;
+}
+
+/* 完成状态样式 */
+.completed {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
 .action-btn {
     padding: 6px 12px;
     border: 1px solid;
@@ -714,20 +808,12 @@ body.light-mode .work-item {
     left: 0;
     width: 100%;
     height: 100%;
-    backdrop-filter: blur(20px);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
     display: none;
-}
-
-body.dark-mode .modal {
-    background: rgba(10, 11, 17, 0.9);
-}
-
-body.light-mode .modal {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .modal.show {
@@ -738,21 +824,20 @@ body.light-mode .modal {
     padding: 32px;
     border-radius: 12px;
     width: 90%;
-    max-width: 500px;
+    max-width: 400px;
     backdrop-filter: blur(20px);
     border: 1px solid;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
 }
 
 body.dark-mode .modal-content {
-    background: rgba(16, 18, 27, 0.8);
-    border-color: rgba(66, 153, 225, 0.1);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    background: rgba(16, 18, 27, 0.95);
+    border-color: rgba(66, 153, 225, 0.2);
 }
 
 body.light-mode .modal-content {
-    background: rgba(255, 255, 255, 0.9);
-    border-color: rgba(66, 153, 225, 0.2);
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(66, 153, 225, 0.3);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 

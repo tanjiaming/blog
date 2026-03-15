@@ -103,6 +103,10 @@
                         <h2>生活</h2>
                         <p>记录生活点滴</p>
                     </div>
+                    <div class="add-life-item">
+                        <input type="text" id="life-input" placeholder="添加生活事项..." maxlength="50">
+                        <button class="add-btn" id="add-life-btn">+</button>
+                    </div>
                     <div class="content-list" id="life-list">
                         <!-- 生活内容将通过JavaScript动态生成 -->
                     </div>
@@ -113,6 +117,7 @@
                     <div class="section-header">
                         <h2>健康</h2>
                         <p>关注身心健康</p>
+                        <button class="add-btn" id="add-health">+ 写文章</button>
                     </div>
                     <div class="content-list" id="health-list">
                         <!-- 健康内容将通过JavaScript动态生成 -->
@@ -151,6 +156,18 @@
             <div class="modal-buttons">
                 <button id="edit-confirm">保存</button>
                 <button id="edit-cancel">取消</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 删除确认模态框 -->
+    <div id="delete-modal" class="modal">
+        <div class="modal-content">
+            <h3>确认删除</h3>
+            <p>确定要删除这个项目吗？</p>
+            <div class="modal-buttons">
+                <button id="delete-confirm">确认删除</button>
+                <button id="delete-cancel">取消</button>
             </div>
         </div>
     </div>
