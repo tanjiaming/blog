@@ -9,8 +9,8 @@ let db;
 
 // API配置
 const API_CONFIG = {
-  // 基础URL，根据环境调整
-  baseUrl: '' // 使用相对路径，会自动根据当前域名生成
+  // 基础URL，使用相对路径，确保在任何环境中都能正确访问
+  baseUrl: ''
 };
 
 // 初始化数据
