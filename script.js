@@ -85,10 +85,25 @@ const elements = {
 async function loadDataFromAPI() {
     try {
         console.log('开始从后端API加载数据...');
+        console.log('当前页面URL:', window.location.href);
+        console.log('API请求URL:', '/api/data');
+        
         const response = await fetch('/api/data');
+        console.log('API响应状态:', response.status);
+        console.log('API响应状态文本:', response.statusText);
+        
         if (response.ok) {
+            console.log('API响应成功，开始解析数据...');
             const apiData = await response.json();
             console.log('从API加载的数据:', apiData);
+            console.log('API数据类型:', typeof apiData);
+            console.log('API数据是否为对象:', apiData instanceof Object);
+            console.log('API数据中的articles:', apiData.articles);
+            console.log('API数据中的ideas:', apiData.ideas);
+            console.log('API数据中的works:', apiData.works);
+            console.log('API数据中的life:', apiData.life);
+            console.log('API数据中的health:', apiData.health);
+            
             // 确保数据结构正确
             data = {
                 articles: apiData.articles || [],
@@ -98,13 +113,25 @@ async function loadDataFromAPI() {
                 health: apiData.health || []
             };
             console.log('从API加载数据完成，作品数量:', data.works.length);
+            console.log('从API加载数据完成，文章数量:', data.articles.length);
+            console.log('从API加载数据完成，灵感数量:', data.ideas.length);
+            console.log('从API加载数据完成，生活事项数量:', data.life.length);
+            console.log('从API加载数据完成，健康文章数量:', data.health.length);
+            
+            // 显示数据加载成功的提示
+            alert(`数据加载成功！\n文章: ${data.articles.length}\n灵感: ${data.ideas.length}\n作品: ${data.works.length}\n生活: ${data.life.length}\n健康: ${data.health.length}`);
+            
             return true;
         } else {
+            console.log('API加载失败，状态码:', response.status);
             console.log('API加载失败，尝试从本地存储加载');
             return false;
         }
     } catch (error) {
         console.error('从API加载数据失败:', error);
+        console.error('错误类型:', error.name);
+        console.error('错误消息:', error.message);
+        console.error('错误堆栈:', error.stack);
         return false;
     }
 }
@@ -115,8 +142,12 @@ function loadDataFromLocalStorage() {
         console.log('开始从本地存储加载数据...');
         const backupData = localStorage.getItem('backupData');
         if (backupData) {
+            console.log('本地存储中存在数据，长度:', backupData.length);
             const parsedData = JSON.parse(backupData);
             console.log('从本地存储加载的数据:', parsedData);
+            console.log('从本地存储加载的数据，作品数量:', parsedData.works?.length || 0);
+            console.log('从本地存储加载的数据，文章数量:', parsedData.articles?.length || 0);
+            console.log('从本地存储加载的数据，灵感数量:', parsedData.ideas?.length || 0);
             data = parsedData;
             console.log('从本地存储加载数据完成');
             return true;
@@ -126,6 +157,8 @@ function loadDataFromLocalStorage() {
         }
     } catch (error) {
         console.error('从本地存储加载数据失败:', error);
+        console.error('错误类型:', error.name);
+        console.error('错误消息:', error.message);
         return false;
     }
 }
@@ -140,24 +173,34 @@ async function init() {
         console.log('articlesList:', elements.articlesList);
         console.log('ideasList:', elements.ideasList);
         console.log('worksList:', elements.worksList);
+        console.log('lifeList:', elements.lifeList);
+        console.log('healthList:', elements.healthList);
         
         // 初始化默认数据
         initData();
         console.log('默认数据初始化完成:', data);
+        console.log('默认数据中的文章数量:', data.articles.length);
+        console.log('默认数据中的灵感数量:', data.ideas.length);
+        console.log('默认数据中的作品数量:', data.works.length);
         
         // 尝试从API加载数据
+        console.log('开始尝试从API加载数据...');
         const apiSuccess = await loadDataFromAPI();
+        console.log('API加载结果:', apiSuccess);
         
         // 如果API加载失败，尝试从本地存储加载
         if (!apiSuccess) {
             console.log('API加载失败，尝试从本地存储加载');
-            loadDataFromLocalStorage();
+            const localStorageSuccess = loadDataFromLocalStorage();
+            console.log('本地存储加载结果:', localStorageSuccess);
         }
         
         console.log('数据加载完成:', data);
         console.log('数据中的文章数量:', data.articles.length);
         console.log('数据中的灵感数量:', data.ideas.length);
         console.log('数据中的作品数量:', data.works.length);
+        console.log('数据中的生活事项数量:', data.life.length);
+        console.log('数据中的健康文章数量:', data.health.length);
         
         setupEventListeners();
         console.log('事件监听器设置完成');
@@ -169,12 +212,18 @@ async function init() {
         console.log('主题设置完成');
     } catch (error) {
         console.error('初始化失败:', error);
+        console.error('错误类型:', error.name);
+        console.error('错误消息:', error.message);
+        console.error('错误堆栈:', error.stack);
         
         // 即使初始化失败，也尝试创建示例数据并渲染
         try {
             console.log('尝试创建示例数据...');
             initData();
             console.log('示例数据创建成功:', data);
+            console.log('示例数据中的文章数量:', data.articles.length);
+            console.log('示例数据中的灵感数量:', data.ideas.length);
+            console.log('示例数据中的作品数量:', data.works.length);
             
             // 尝试渲染内容
             console.log('尝试渲染内容...');
@@ -187,6 +236,8 @@ async function init() {
             console.log('主题设置完成');
         } catch (e) {
             console.error('创建示例数据和渲染失败:', e);
+            console.error('错误类型:', e.name);
+            console.error('错误消息:', e.message);
         }
     }
 }
@@ -314,6 +365,7 @@ function renderContent() {
 function renderArticles() {
     console.log('开始渲染文章...');
     console.log('articlesList元素:', elements.articlesList);
+    console.log('待渲染的文章数量:', data.articles.length);
     
     // 按日期和时间倒序排序，确保最新的在最上面
     const articles = (data.articles || []).sort((a, b) => {
@@ -324,7 +376,7 @@ function renderArticles() {
         return dateB - dateA;
     });
     
-    console.log('文章数据:', articles);
+    console.log('排序后的文章数据:', articles);
     
     const articlesHTML = articles.map(article => `
         <div class="content-item">
@@ -340,9 +392,11 @@ function renderArticles() {
         </div>
     `).join('');
     
+    console.log('生成的文章HTML长度:', articlesHTML.length);
     console.log('文章HTML:', articlesHTML);
     
     if (elements.articlesList) {
+        console.log('设置articlesList的innerHTML');
         elements.articlesList.innerHTML = articlesHTML;
         console.log('文章HTML已设置到articlesList');
     } else {
@@ -354,6 +408,10 @@ function renderArticles() {
 
 // 渲染灵感
 function renderIdeas() {
+    console.log('开始渲染灵感...');
+    console.log('ideasList元素:', elements.ideasList);
+    console.log('待渲染的灵感数量:', data.ideas.length);
+    
     // 按日期和时间倒序排序，确保最新的在最上面
     const ideas = (data.ideas || []).sort((a, b) => {
         // 创建包含时间的完整日期对象
@@ -362,7 +420,10 @@ function renderIdeas() {
         // 倒序排列：返回 dateB - dateA
         return dateB - dateA;
     });
-    elements.ideasList.innerHTML = ideas.map(idea => `
+    
+    console.log('排序后的灵感数据:', ideas);
+    
+    const ideasHTML = ideas.map(idea => `
         <div class="content-item">
             <div class="title-container">
                 <h3>${idea.title}</h3>
@@ -375,22 +436,46 @@ function renderIdeas() {
             </div>
         </div>
     `).join('');
+    
+    console.log('生成的灵感HTML长度:', ideasHTML.length);
+    console.log('灵感HTML:', ideasHTML);
+    
+    if (elements.ideasList) {
+        console.log('设置ideasList的innerHTML');
+        elements.ideasList.innerHTML = ideasHTML;
+        console.log('灵感HTML已设置到ideasList');
+    } else {
+        console.error('ideasList元素不存在');
+    }
+    
+    console.log('灵感渲染完成');
 }
 
 // 渲染作品
 function renderWorks() {
+    console.log('开始渲染作品...');
+    console.log('worksList元素:', elements.worksList);
+    console.log('待渲染的作品数量:', data.works.length);
+    
     const works = (data.works || []).sort((a, b) => {
         const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
         const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
         return dateB - dateA;
     });
+    
+    console.log('排序后的作品数据:', works);
+    
     const activeCategory = document.querySelector('.category-btn.active').dataset.category;
+    console.log('当前激活的分类:', activeCategory);
     
     const filteredWorks = activeCategory === 'all' 
         ? works 
         : works.filter(work => work.category === activeCategory);
     
-    elements.worksList.innerHTML = filteredWorks.map(work => `
+    console.log('过滤后的作品数量:', filteredWorks.length);
+    console.log('过滤后的作品数据:', filteredWorks);
+    
+    const worksHTML = filteredWorks.map(work => `
         <div class="work-item">
             <img src="${work.image}" alt="${work.title}" class="work-image">
             <div class="work-category">${getCategoryName(work.category)}</div>
@@ -405,6 +490,19 @@ function renderWorks() {
             </div>
         </div>
     `).join('');
+    
+    console.log('生成的作品HTML长度:', worksHTML.length);
+    console.log('作品HTML:', worksHTML);
+    
+    if (elements.worksList) {
+        console.log('设置worksList的innerHTML');
+        elements.worksList.innerHTML = worksHTML;
+        console.log('作品HTML已设置到worksList');
+    } else {
+        console.error('worksList元素不存在');
+    }
+    
+    console.log('作品渲染完成');
 }
 
 // 添加生活事项

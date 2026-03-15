@@ -19,6 +19,11 @@ app.use(express.urlencoded({ limit: '10mb', extended: true })); // 增加URL编�
 app.use(express.static('.'));
 app.use('/images', express.static('images'));
 
+// 处理根路径请求，返回index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // TDSQL-C数据库连接配置
 const dbConfig = {
   host: 'sh-cynosdbmysql-grp-ehho0drs.sql.tencentcdb.com', // 腾讯云TDSQL-C的主机地址
@@ -182,8 +187,11 @@ app.post('/api/upload', (req, res) => {
 
 // API接口：获取所有数据
 app.get('/api/data', async (req, res) => {
+  console.log('收到API数据请求');
   try {
+    console.log('开始处理API数据请求');
     const connection = await pool.getConnection();
+    console.log('数据库连接成功');
     
     // 辅助函数：格式化日期
     function formatDate(date) {
@@ -203,51 +211,69 @@ app.get('/api/data', async (req, res) => {
     }
     
     // 获取文章
+    console.log('开始获取文章数据');
     const [articles] = await connection.execute('SELECT * FROM articles ORDER BY date DESC, time DESC');
+    console.log('获取到文章数据:', articles.length, '条');
     const formattedArticles = articles.map(article => ({
       ...article,
       date: formatDate(article.date)
     }));
     
     // 获取灵感
+    console.log('开始获取灵感数据');
     const [ideas] = await connection.execute('SELECT * FROM ideas ORDER BY date DESC, time DESC');
+    console.log('获取到灵感数据:', ideas.length, '条');
     const formattedIdeas = ideas.map(idea => ({
       ...idea,
       date: formatDate(idea.date)
     }));
     
     // 获取作品
+    console.log('开始获取作品数据');
     const [works] = await connection.execute('SELECT * FROM works ORDER BY date DESC, time DESC');
+    console.log('获取到作品数据:', works.length, '条');
     const formattedWorks = works.map(work => ({
       ...work,
       date: formatDate(work.date)
     }));
     
     // 获取生活
+    console.log('开始获取生活数据');
     const [life] = await connection.execute('SELECT * FROM life ORDER BY date DESC, time DESC');
+    console.log('获取到生活数据:', life.length, '条');
     const formattedLife = life.map(lifeItem => ({
       ...lifeItem,
       date: formatDate(lifeItem.date)
     }));
     
     // 获取健康
+    console.log('开始获取健康数据');
     const [health] = await connection.execute('SELECT * FROM health ORDER BY date DESC, time DESC');
+    console.log('获取到健康数据:', health.length, '条');
     const formattedHealth = health.map(healthItem => ({
       ...healthItem,
       date: formatDate(healthItem.date)
     }));
     
     connection.release();
+    console.log('数据库连接已释放');
     
-    res.json({
+    const responseData = {
       articles: formattedArticles,
       ideas: formattedIdeas,
       works: formattedWorks,
       life: formattedLife,
       health: formattedHealth
-    });
+    };
+    
+    console.log('准备返回数据:', JSON.stringify(responseData, null, 2));
+    res.json(responseData);
+    console.log('数据已返回');
   } catch (error) {
     console.error('获取数据失败:', error);
+    console.error('错误类型:', error.name);
+    console.error('错误消息:', error.message);
+    console.error('错误堆栈:', error.stack);
     res.status(500).json({ error: '获取数据失败' });
   }
 });
