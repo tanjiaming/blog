@@ -85,7 +85,7 @@ const elements = {
 async function loadDataFromAPI() {
     try {
         console.log('开始从后端API加载数据...');
-        const response = await fetch('http://localhost:3001/api/data');
+        const response = await fetch('/api/data');
         if (response.ok) {
             const apiData = await response.json();
             console.log('从API加载的数据:', apiData);
@@ -650,7 +650,7 @@ async function saveEdit() {
         
         try {
             // 调用上传API
-            const response = await fetch('http://localhost:3001/api/upload', {
+            const response = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData
             });
@@ -743,7 +743,7 @@ async function saveData() {
         
         // 尝试保存到后端API
         try {
-            const response = await fetch('http://localhost:3001/api/data', {
+            const response = await fetch('/api/data', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
