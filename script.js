@@ -7,6 +7,12 @@ let currentEditItem = null;
 let currentEditType = null;
 let db;
 
+// API配置
+const API_CONFIG = {
+  // 基础URL，根据环境调整
+  baseUrl: '' // 使用相对路径，会自动根据当前域名生成
+};
+
 // 初始化数据
 function initData() {
     data = {
@@ -91,7 +97,7 @@ async function loadDataFromAPI() {
         // 测试直接访问API
         console.log('尝试直接访问API...');
         
-        const response = await fetch('/api/data');
+        const response = await fetch(`${API_CONFIG.baseUrl}/api/data`);
         console.log('API响应状态:', response.status);
         console.log('API响应状态文本:', response.statusText);
         
@@ -777,7 +783,7 @@ async function saveEdit() {
         
         try {
             // 调用上传API
-            const response = await fetch('/api/upload', {
+            const response = await fetch(`${API_CONFIG.baseUrl}/api/upload`, {
                 method: 'POST',
                 body: formData
             });
@@ -870,7 +876,7 @@ async function saveData() {
         
         // 尝试保存到后端API
         try {
-            const response = await fetch('/api/data', {
+            const response = await fetch(`${API_CONFIG.baseUrl}/api/data`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
