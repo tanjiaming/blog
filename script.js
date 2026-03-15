@@ -7,137 +7,8 @@ let currentEditItem = null;
 let currentEditType = null;
 let db;
 
-// 不再需要等待Firebase初始化，直接返回
-function waitForFirebase() {
-    return new Promise((resolve) => {
-        console.log('跳过Firebase初始化，直接使用本地数据');
-        db = null;
-        resolve();
-    });
-}
-
-// 不再需要导入Firebase函数，因为我们使用本地数据
-
-// DOM 元素
-const elements = {
-    navItems: document.querySelectorAll('.nav-item'),
-    sections: document.querySelectorAll('.section'),
-    themeToggle: document.getElementById('theme-toggle'),
-    searchInput: document.getElementById('search-input'),
-    searchBtn: document.getElementById('search-btn'),
-    addArticleBtn: document.getElementById('add-article'),
-    addIdeaBtn: document.getElementById('add-idea'),
-    addWorkBtn: document.getElementById('add-work'),
-    passwordModal: document.getElementById('password-modal'),
-    passwordInput: document.getElementById('password-input'),
-    passwordConfirm: document.getElementById('password-confirm'),
-    passwordCancel: document.getElementById('password-cancel'),
-    editModal: document.getElementById('edit-modal'),
-    editTitle: document.getElementById('edit-title'),
-    editItemTitle: document.getElementById('edit-item-title'),
-    editItemContent: document.getElementById('edit-item-content'),
-    editItemImage: document.getElementById('edit-item-image'),
-    editItemCategory: document.getElementById('edit-item-category'),
-    workSpecific: document.getElementById('work-specific'),
-    editConfirm: document.getElementById('edit-confirm'),
-    editCancel: document.getElementById('edit-cancel'),
-    categoryBtns: document.querySelectorAll('.category-btn'),
-    articlesList: document.getElementById('articles-list'),
-    ideasList: document.getElementById('ideas-list'),
-    worksList: document.getElementById('works-list'),
-    lifeList: document.getElementById('life-list'),
-    healthList: document.getElementById('health-list')
-};
-
-// 初始化
-async function init() {
-    try {
-        console.log('开始初始化...');
-        
-        // 检查DOM元素是否存在
-        console.log('检查DOM元素...');
-        console.log('articlesList:', elements.articlesList);
-        console.log('ideasList:', elements.ideasList);
-        console.log('worksList:', elements.worksList);
-        
-        await waitForFirebase();
-        console.log('Firebase初始化完成');
-        
-        await loadData();
-        console.log('数据加载完成:', data);
-        console.log('数据中的文章数量:', data.articles.length);
-        console.log('数据中的灵感数量:', data.ideas.length);
-        console.log('数据中的作品数量:', data.works.length);
-        
-        setupEventListeners();
-        console.log('事件监听器设置完成');
-        
-        renderContent();
-        console.log('内容渲染完成');
-        
-        setupTheme();
-        console.log('主题设置完成');
-    } catch (error) {
-        console.error('初始化失败:', error);
-        
-        // 即使初始化失败，也尝试创建示例数据并渲染
-        try {
-            console.log('尝试创建示例数据...');
-            data = {
-                articles: [
-                    {
-                        id: '1',
-                        title: '示例文章',
-                        content: '这是一篇示例文章，用于测试数据加载功能。',
-                        date: '2026-03-14',
-                        time: '12:00:00'
-                    }
-                ],
-                ideas: [
-                    {
-                        id: '1',
-                        title: '示例灵感',
-                        content: '这是一个示例灵感，用于测试数据加载功能。',
-                        date: '2026-03-14',
-                        time: '12:00:00'
-                    }
-                ],
-                works: [
-                    {
-                        id: '1',
-                        title: '示例作品',
-                        description: '这是一个示例作品，用于测试数据加载功能。',
-                        category: 'website',
-                        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20work%20image&image_size=landscape_16_9',
-                        date: '2026-03-14',
-                        time: '12:00:00'
-                    }
-                ],
-                life: [],
-                health: []
-            };
-            console.log('示例数据创建成功:', data);
-            
-            // 尝试渲染内容
-            console.log('尝试渲染内容...');
-            renderContent();
-            console.log('内容渲染完成');
-            
-            // 尝试设置主题
-            console.log('尝试设置主题...');
-            setupTheme();
-            console.log('主题设置完成');
-        } catch (e) {
-            console.error('创建示例数据和渲染失败:', e);
-        }
-    }
-}
-
-// 加载数据
-async function loadData() {
-    console.log('开始加载数据...');
-    
-    // 直接创建示例数据，不依赖Firebase或本地存储
+// 初始化数据
+function initData() {
     data = {
         articles: [
             {
@@ -171,22 +42,139 @@ async function loadData() {
         life: [],
         health: []
     };
-    
-    console.log('示例数据创建成功:', data);
-    console.log('数据加载完成:', data);
-    console.log('数据中的文章数量:', data.articles.length);
-    console.log('数据中的灵感数量:', data.ideas.length);
-    console.log('数据中的作品数量:', data.works.length);
 }
 
-// 保存数据到本地存储
-async function saveData() {
+// DOM 元素
+const elements = {
+    navItems: document.querySelectorAll('.nav-item'),
+    sections: document.querySelectorAll('.section'),
+    themeToggle: document.getElementById('theme-toggle'),
+    searchInput: document.getElementById('search-input'),
+    searchBtn: document.getElementById('search-btn'),
+    addArticleBtn: document.getElementById('add-article'),
+    addIdeaBtn: document.getElementById('add-idea'),
+    addWorkBtn: document.getElementById('add-work'),
+    passwordModal: document.getElementById('password-modal'),
+    passwordInput: document.getElementById('password-input'),
+    passwordConfirm: document.getElementById('password-confirm'),
+    passwordCancel: document.getElementById('password-cancel'),
+    editModal: document.getElementById('edit-modal'),
+    editTitle: document.getElementById('edit-title'),
+    editItemTitle: document.getElementById('edit-item-title'),
+    editItemContent: document.getElementById('edit-item-content'),
+    editItemImage: document.getElementById('edit-item-image'),
+    editItemCategory: document.getElementById('edit-item-category'),
+    workSpecific: document.getElementById('work-specific'),
+    editConfirm: document.getElementById('edit-confirm'),
+    editCancel: document.getElementById('edit-cancel'),
+    categoryBtns: document.querySelectorAll('.category-btn'),
+    articlesList: document.getElementById('articles-list'),
+    ideasList: document.getElementById('ideas-list'),
+    worksList: document.getElementById('works-list'),
+    lifeList: document.getElementById('life-list'),
+    healthList: document.getElementById('health-list')
+};
+
+// 从后端API加载数据
+async function loadDataFromAPI() {
     try {
-        // 保存到本地存储
-        localStorage.setItem('backupData', JSON.stringify(data));
-        console.log('数据已保存到本地存储:', data);
+        console.log('开始从后端API加载数据...');
+        const response = await fetch('http://localhost:3001/api/data');
+        if (response.ok) {
+            const apiData = await response.json();
+            console.log('从API加载的数据:', apiData);
+            data = apiData;
+            console.log('从API加载数据完成');
+            return true;
+        } else {
+            console.log('API加载失败，尝试从本地存储加载');
+            return false;
+        }
     } catch (error) {
-        console.error('保存数据失败:', error);
+        console.error('从API加载数据失败:', error);
+        return false;
+    }
+}
+
+// 从本地存储加载数据
+function loadDataFromLocalStorage() {
+    try {
+        console.log('开始从本地存储加载数据...');
+        const backupData = localStorage.getItem('backupData');
+        if (backupData) {
+            const parsedData = JSON.parse(backupData);
+            console.log('从本地存储加载的数据:', parsedData);
+            data = parsedData;
+            console.log('从本地存储加载数据完成');
+            return true;
+        } else {
+            console.log('本地存储中没有数据');
+            return false;
+        }
+    } catch (error) {
+        console.error('从本地存储加载数据失败:', error);
+        return false;
+    }
+}
+
+// 初始化
+async function init() {
+    try {
+        console.log('开始初始化...');
+        
+        // 检查DOM元素是否存在
+        console.log('检查DOM元素...');
+        console.log('articlesList:', elements.articlesList);
+        console.log('ideasList:', elements.ideasList);
+        console.log('worksList:', elements.worksList);
+        
+        // 初始化默认数据
+        initData();
+        console.log('默认数据初始化完成:', data);
+        
+        // 尝试从API加载数据
+        const apiSuccess = await loadDataFromAPI();
+        
+        // 如果API加载失败，尝试从本地存储加载
+        if (!apiSuccess) {
+            console.log('API加载失败，尝试从本地存储加载');
+            loadDataFromLocalStorage();
+        }
+        
+        console.log('数据加载完成:', data);
+        console.log('数据中的文章数量:', data.articles.length);
+        console.log('数据中的灵感数量:', data.ideas.length);
+        console.log('数据中的作品数量:', data.works.length);
+        
+        setupEventListeners();
+        console.log('事件监听器设置完成');
+        
+        renderContent();
+        console.log('内容渲染完成');
+        
+        setupTheme();
+        console.log('主题设置完成');
+    } catch (error) {
+        console.error('初始化失败:', error);
+        
+        // 即使初始化失败，也尝试创建示例数据并渲染
+        try {
+            console.log('尝试创建示例数据...');
+            initData();
+            console.log('示例数据创建成功:', data);
+            
+            // 尝试渲染内容
+            console.log('尝试渲染内容...');
+            renderContent();
+            console.log('内容渲染完成');
+            
+            // 尝试设置主题
+            console.log('尝试设置主题...');
+            setupTheme();
+            console.log('主题设置完成');
+        } catch (e) {
+            console.error('创建示例数据和渲染失败:', e);
+        }
     }
 }
 
@@ -600,6 +588,36 @@ async function saveEdit() {
     }
 }
 
+// 保存数据
+async function saveData() {
+    try {
+        // 保存到本地存储
+        localStorage.setItem('backupData', JSON.stringify(data));
+        console.log('数据已保存到本地存储:', data);
+        
+        // 尝试保存到后端API
+        try {
+            const response = await fetch('http://localhost:3001/api/data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                console.log('数据已保存到TDSQL-C数据库');
+            } else {
+                console.log('TDSQL-C保存失败，但数据已保存到本地存储');
+            }
+        } catch (apiError) {
+            console.error('API调用失败:', apiError);
+            console.log('API调用失败，但数据已保存到本地存储');
+        }
+    } catch (error) {
+        console.error('保存数据失败:', error);
+    }
+}
+
 // 确认删除
 async function confirmDelete(type, id) {
     // 如果未认证或认证已过期，先验证密码
@@ -735,5 +753,4 @@ function toggleTheme() {
     }, 500);
 }
 
-// 初始化应用
-init();
+// 初始化应用将在Firebase SDK加载后手动调用
