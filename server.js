@@ -11,7 +11,11 @@ const PORT = process.env.PORT || 3001;
 app.use(fileUpload());
 
 // 中间件
-app.use(cors());
+app.use(cors({
+  origin: '*', // 允许所有来源
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json({ limit: '10mb' })); // 增加请求体大小限制
 app.use(express.urlencoded({ limit: '10mb', extended: true })); // 增加URL编码请求体大小限制
 
