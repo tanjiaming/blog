@@ -9,8 +9,18 @@ let db;
 
 // API配置
 const API_CONFIG = {
-  // 基础URL，使用相对路径，确保在任何环境中都能正确访问
-  baseUrl: ''
+  // 基础URL，根据环境调整
+  baseUrl: function() {
+    // 检查当前域名
+    const currentDomain = window.location.hostname;
+    // 如果是本地开发环境，使用localhost
+    if (currentDomain === 'localhost' || currentDomain === '127.0.0.1') {
+      return 'http://localhost:3001';
+    }
+    // 否则使用公网后端服务器地址
+    // 注意：这里需要替换为您的公网后端服务器地址
+    return 'http://localhost:3001';
+  }()
 };
 
 // 初始化数据
@@ -218,17 +228,19 @@ async function init() {
         console.log('默认数据中的灵感数量:', data.ideas.length);
         console.log('默认数据中的作品数量:', data.works.length);
         
+        // 首先从本地存储加载数据，确保数据持久化
+        console.log('尝试从本地存储加载数据...');
+        ensureDataPersistence();
+        console.log('本地存储数据加载完成，当前数据:', data);
+        
         // 尝试从API加载数据
         console.log('开始尝试从API加载数据...');
         const apiSuccess = await loadDataFromAPI();
         console.log('API加载结果:', apiSuccess);
         
-        // 如果API加载失败，尝试从本地存储加载
-        if (!apiSuccess) {
-            console.log('API加载失败，尝试从本地存储加载');
-            const localStorageSuccess = loadDataFromLocalStorage();
-            console.log('本地存储加载结果:', localStorageSuccess);
-        }
+        // 无论API加载是否成功，都保存数据到本地存储，确保数据持久化
+        console.log('保存数据到本地存储...');
+        await saveData();
         
         console.log('数据加载完成:', data);
         console.log('数据中的文章数量:', data.articles.length);
@@ -257,14 +269,11 @@ async function init() {
         // 显示错误信息
         alert(`初始化失败: ${error.message}`);
         
-        // 即使初始化失败，也尝试创建示例数据并渲染
+        // 即使初始化失败，也尝试从本地存储加载数据并渲染
         try {
-            console.log('尝试创建示例数据...');
-            initData();
-            console.log('示例数据创建成功:', data);
-            console.log('示例数据中的文章数量:', data.articles.length);
-            console.log('示例数据中的灵感数量:', data.ideas.length);
-            console.log('示例数据中的作品数量:', data.works.length);
+            console.log('尝试从本地存储加载数据...');
+            ensureDataPersistence();
+            console.log('本地存储数据加载完成:', data);
             
             // 尝试渲染内容
             console.log('尝试渲染内容...');
@@ -276,10 +285,10 @@ async function init() {
             setupTheme();
             console.log('主题设置完成');
         } catch (e) {
-            console.error('创建示例数据和渲染失败:', e);
+            console.error('加载本地存储数据和渲染失败:', e);
             console.error('错误类型:', e.name);
             console.error('错误消息:', e.message);
-            alert(`创建示例数据失败: ${e.message}`);
+            alert(`加载本地存储数据失败: ${e.message}`);
         }
     }
 }
@@ -901,6 +910,29 @@ async function saveData() {
         }
     } catch (error) {
         console.error('保存数据失败:', error);
+    }
+}
+
+// 增强本地存储功能，确保数据持久化
+function ensureDataPersistence() {
+    // 检查本地存储中是否有数据
+    const backupData = localStorage.getItem('backupData');
+    if (backupData) {
+        try {
+            const parsedData = JSON.parse(backupData);
+            console.log('从本地存储加载数据:', parsedData);
+            // 确保数据结构完整
+            data = {
+                articles: Array.isArray(parsedData.articles) ? parsedData.articles : [],
+                ideas: Array.isArray(parsedData.ideas) ? parsedData.ideas : [],
+                works: Array.isArray(parsedData.works) ? parsedData.works : [],
+                life: Array.isArray(parsedData.life) ? parsedData.life : [],
+                health: Array.isArray(parsedData.health) ? parsedData.health : []
+            };
+            console.log('本地存储数据加载完成');
+        } catch (error) {
+            console.error('解析本地存储数据失败:', error);
+        }
     }
 }
 
