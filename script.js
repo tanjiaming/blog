@@ -88,42 +88,71 @@ async function loadDataFromAPI() {
         console.log('当前页面URL:', window.location.href);
         console.log('API请求URL:', '/api/data');
         
+        // 测试直接访问API
+        console.log('尝试直接访问API...');
+        
         const response = await fetch('/api/data');
         console.log('API响应状态:', response.status);
         console.log('API响应状态文本:', response.statusText);
         
+        // 检查响应头
+        const headers = {};
+        for (const [key, value] of response.headers.entries()) {
+            headers[key] = value;
+        }
+        console.log('API响应头:', headers);
+        
+        // 读取响应文本
+        const responseText = await response.text();
+        console.log('API响应文本:', responseText);
+        
         if (response.ok) {
-            console.log('API响应成功，开始解析数据...');
-            const apiData = await response.json();
-            console.log('从API加载的数据:', apiData);
-            console.log('API数据类型:', typeof apiData);
-            console.log('API数据是否为对象:', apiData instanceof Object);
-            console.log('API数据中的articles:', apiData.articles);
-            console.log('API数据中的ideas:', apiData.ideas);
-            console.log('API数据中的works:', apiData.works);
-            console.log('API数据中的life:', apiData.life);
-            console.log('API数据中的health:', apiData.health);
-            
-            // 确保数据结构正确
-            data = {
-                articles: apiData.articles || [],
-                ideas: apiData.ideas || [],
-                works: apiData.works || [],
-                life: apiData.life || [],
-                health: apiData.health || []
-            };
-            console.log('从API加载数据完成，作品数量:', data.works.length);
-            console.log('从API加载数据完成，文章数量:', data.articles.length);
-            console.log('从API加载数据完成，灵感数量:', data.ideas.length);
-            console.log('从API加载数据完成，生活事项数量:', data.life.length);
-            console.log('从API加载数据完成，健康文章数量:', data.health.length);
-            
-            // 显示数据加载成功的提示
-            alert(`数据加载成功！\n文章: ${data.articles.length}\n灵感: ${data.ideas.length}\n作品: ${data.works.length}\n生活: ${data.life.length}\n健康: ${data.health.length}`);
-            
-            return true;
+            try {
+                console.log('API响应成功，开始解析数据...');
+                const apiData = JSON.parse(responseText);
+                console.log('从API加载的数据:', apiData);
+                console.log('API数据类型:', typeof apiData);
+                console.log('API数据是否为对象:', apiData instanceof Object);
+                
+                // 检查数据结构
+                console.log('API数据是否包含articles:', 'articles' in apiData);
+                console.log('API数据是否包含ideas:', 'ideas' in apiData);
+                console.log('API数据是否包含works:', 'works' in apiData);
+                console.log('API数据是否包含life:', 'life' in apiData);
+                console.log('API数据是否包含health:', 'health' in apiData);
+                
+                if (apiData instanceof Object) {
+                    // 确保数据结构正确
+                    data = {
+                        articles: Array.isArray(apiData.articles) ? apiData.articles : [],
+                        ideas: Array.isArray(apiData.ideas) ? apiData.ideas : [],
+                        works: Array.isArray(apiData.works) ? apiData.works : [],
+                        life: Array.isArray(apiData.life) ? apiData.life : [],
+                        health: Array.isArray(apiData.health) ? apiData.health : []
+                    };
+                    console.log('从API加载数据完成，作品数量:', data.works.length);
+                    console.log('从API加载数据完成，文章数量:', data.articles.length);
+                    console.log('从API加载数据完成，灵感数量:', data.ideas.length);
+                    console.log('从API加载数据完成，生活事项数量:', data.life.length);
+                    console.log('从API加载数据完成，健康文章数量:', data.health.length);
+                    
+                    // 显示数据加载成功的提示
+                    alert(`数据加载成功！\n文章: ${data.articles.length}\n灵感: ${data.ideas.length}\n作品: ${data.works.length}\n生活: ${data.life.length}\n健康: ${data.health.length}`);
+                    
+                    return true;
+                } else {
+                    console.error('API返回的数据不是对象:', apiData);
+                    return false;
+                }
+            } catch (parseError) {
+                console.error('解析API响应失败:', parseError);
+                console.error('错误类型:', parseError.name);
+                console.error('错误消息:', parseError.message);
+                return false;
+            }
         } else {
             console.log('API加载失败，状态码:', response.status);
+            console.log('API加载失败，响应文本:', responseText);
             console.log('API加载失败，尝试从本地存储加载');
             return false;
         }
