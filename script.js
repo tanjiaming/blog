@@ -237,6 +237,9 @@ async function init() {
         console.log('数据中的生活事项数量:', data.life.length);
         console.log('数据中的健康文章数量:', data.health.length);
         
+        // 显示数据加载状态
+        alert(`初始化完成！\n从API加载: ${apiSuccess ? '成功' : '失败'}\n最终数据: 文章 ${data.articles.length} 篇, 灵感 ${data.ideas.length} 个, 作品 ${data.works.length} 个, 生活 ${data.life.length} 项`);
+        
         setupEventListeners();
         console.log('事件监听器设置完成');
         
@@ -250,6 +253,9 @@ async function init() {
         console.error('错误类型:', error.name);
         console.error('错误消息:', error.message);
         console.error('错误堆栈:', error.stack);
+        
+        // 显示错误信息
+        alert(`初始化失败: ${error.message}`);
         
         // 即使初始化失败，也尝试创建示例数据并渲染
         try {
@@ -273,6 +279,7 @@ async function init() {
             console.error('创建示例数据和渲染失败:', e);
             console.error('错误类型:', e.name);
             console.error('错误消息:', e.message);
+            alert(`创建示例数据失败: ${e.message}`);
         }
     }
 }
