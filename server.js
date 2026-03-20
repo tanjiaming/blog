@@ -99,7 +99,8 @@ async function createTables() {
         title VARCHAR(255) NOT NULL,
         content TEXT NOT NULL,
         date DATE NOT NULL,
-        time VARCHAR(8) NOT NULL
+        time VARCHAR(8) NOT NULL,
+        isDelete INT DEFAULT 1
       )
     `);
     
@@ -110,7 +111,8 @@ async function createTables() {
         title VARCHAR(255) NOT NULL,
         content TEXT NOT NULL,
         date DATE NOT NULL,
-        time VARCHAR(8) NOT NULL
+        time VARCHAR(8) NOT NULL,
+        isDelete INT DEFAULT 1
       )
     `);
     
@@ -123,7 +125,8 @@ async function createTables() {
         category VARCHAR(50) NOT NULL,
         image VARCHAR(255) NOT NULL,
         date DATE NOT NULL,
-        time VARCHAR(8) NOT NULL
+        time VARCHAR(8) NOT NULL,
+        isDelete INT DEFAULT 1
       )
     `);
     
@@ -136,7 +139,8 @@ async function createTables() {
         date DATE NOT NULL,
         time VARCHAR(8) NOT NULL,
         completed BOOLEAN DEFAULT FALSE,
-        emoji VARCHAR(10) DEFAULT '📝'
+        emoji VARCHAR(10) DEFAULT '📝',
+        isDelete INT DEFAULT 1
       )
     `);
     
@@ -147,7 +151,8 @@ async function createTables() {
         title VARCHAR(255) NOT NULL,
         content TEXT NOT NULL,
         date DATE NOT NULL,
-        time VARCHAR(8) NOT NULL
+        time VARCHAR(8) NOT NULL,
+        isDelete INT DEFAULT 1
       )
     `);
     
@@ -216,7 +221,7 @@ app.get('/api/data', async (req, res) => {
     
     // 获取文章
     console.log('开始获取文章数据');
-    const [articles] = await connection.execute('SELECT * FROM articles ORDER BY date DESC, time DESC');
+    const [articles] = await connection.execute('SELECT * FROM articles WHERE isDelete = 1 ORDER BY date DESC, time DESC');
     console.log('获取到文章数据:', articles.length, '条');
     const formattedArticles = articles.map(article => ({
       ...article,
@@ -225,7 +230,7 @@ app.get('/api/data', async (req, res) => {
     
     // 获取灵感
     console.log('开始获取灵感数据');
-    const [ideas] = await connection.execute('SELECT * FROM ideas ORDER BY date DESC, time DESC');
+    const [ideas] = await connection.execute('SELECT * FROM ideas WHERE isDelete = 1 ORDER BY date DESC, time DESC');
     console.log('获取到灵感数据:', ideas.length, '条');
     const formattedIdeas = ideas.map(idea => ({
       ...idea,
@@ -234,7 +239,7 @@ app.get('/api/data', async (req, res) => {
     
     // 获取作品
     console.log('开始获取作品数据');
-    const [works] = await connection.execute('SELECT * FROM works ORDER BY date DESC, time DESC');
+    const [works] = await connection.execute('SELECT * FROM works WHERE isDelete = 1 ORDER BY date DESC, time DESC');
     console.log('获取到作品数据:', works.length, '条');
     const formattedWorks = works.map(work => ({
       ...work,
@@ -243,7 +248,7 @@ app.get('/api/data', async (req, res) => {
     
     // 获取生活
     console.log('开始获取生活数据');
-    const [life] = await connection.execute('SELECT * FROM life ORDER BY date DESC, time DESC');
+    const [life] = await connection.execute('SELECT * FROM life WHERE isDelete = 1 ORDER BY date DESC, time DESC');
     console.log('获取到生活数据:', life.length, '条');
     const formattedLife = life.map(lifeItem => ({
       ...lifeItem,
@@ -252,7 +257,7 @@ app.get('/api/data', async (req, res) => {
     
     // 获取健康
     console.log('开始获取健康数据');
-    const [health] = await connection.execute('SELECT * FROM health ORDER BY date DESC, time DESC');
+    const [health] = await connection.execute('SELECT * FROM health WHERE isDelete = 1 ORDER BY date DESC, time DESC');
     console.log('获取到健康数据:', health.length, '条');
     const formattedHealth = health.map(healthItem => ({
       ...healthItem,
@@ -312,40 +317,40 @@ app.post('/api/data', async (req, res) => {
       // 插入文章
       for (const article of articles) {
         await connection.execute(
-          'INSERT INTO articles (id, title, content, date, time) VALUES (?, ?, ?, ?, ?)',
-          [article.id, article.title, article.content, formatDate(article.date), article.time]
+          'INSERT INTO articles (id, title, content, date, time, isDelete) VALUES (?, ?, ?, ?, ?, ?)',
+          [article.id, article.title, article.content, formatDate(article.date), article.time, article.isDelete || 1]
         );
       }
       
       // 插入灵感
       for (const idea of ideas) {
         await connection.execute(
-          'INSERT INTO ideas (id, title, content, date, time) VALUES (?, ?, ?, ?, ?)',
-          [idea.id, idea.title, idea.content, formatDate(idea.date), idea.time]
+          'INSERT INTO ideas (id, title, content, date, time, isDelete) VALUES (?, ?, ?, ?, ?, ?)',
+          [idea.id, idea.title, idea.content, formatDate(idea.date), idea.time, idea.isDelete || 1]
         );
       }
       
       // 插入作品
       for (const work of works) {
         await connection.execute(
-          'INSERT INTO works (id, title, description, category, image, date, time) VALUES (?, ?, ?, ?, ?, ?, ?)',
-          [work.id, work.title, work.description, work.category, work.image, formatDate(work.date), work.time]
+          'INSERT INTO works (id, title, description, category, image, date, time, isDelete) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [work.id, work.title, work.description, work.category, work.image, formatDate(work.date), work.time, work.isDelete || 1]
         );
       }
       
       // 插入生活
       for (const lifeItem of life) {
         await connection.execute(
-          'INSERT INTO life (id, title, content, date, time, completed, emoji) VALUES (?, ?, ?, ?, ?, ?, ?)',
-          [lifeItem.id, lifeItem.title, lifeItem.content, formatDate(lifeItem.date), lifeItem.time, lifeItem.completed || false, lifeItem.emoji || '📝']
+          'INSERT INTO life (id, title, content, date, time, completed, emoji, isDelete) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          [lifeItem.id, lifeItem.title, lifeItem.content, formatDate(lifeItem.date), lifeItem.time, lifeItem.completed || false, lifeItem.emoji || '📝', lifeItem.isDelete || 1]
         );
       }
       
       // 插入健康
       for (const healthItem of health) {
         await connection.execute(
-          'INSERT INTO health (id, title, content, date, time) VALUES (?, ?, ?, ?, ?)',
-          [healthItem.id, healthItem.title, healthItem.content, formatDate(healthItem.date), healthItem.time]
+          'INSERT INTO health (id, title, content, date, time, isDelete) VALUES (?, ?, ?, ?, ?, ?)',
+          [healthItem.id, healthItem.title, healthItem.content, formatDate(healthItem.date), healthItem.time, healthItem.isDelete || 1]
         );
       }
       

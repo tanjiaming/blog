@@ -405,8 +405,8 @@ function renderArticles() {
     console.log('articlesList元素:', elements.articlesList);
     console.log('待渲染的文章数量:', data.articles.length);
     
-    // 按日期和时间倒序排序，确保最新的在最上面
-    const articles = (data.articles || []).sort((a, b) => {
+    // 按日期和时间倒序排序，确保最新的在最上面，并过滤掉已删除的项目
+    const articles = (data.articles || []).filter(item => item.isDelete !== 0).sort((a, b) => {
         // 创建包含时间的完整日期对象
         const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
         const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
@@ -450,8 +450,8 @@ function renderIdeas() {
     console.log('ideasList元素:', elements.ideasList);
     console.log('待渲染的灵感数量:', data.ideas.length);
     
-    // 按日期和时间倒序排序，确保最新的在最上面
-    const ideas = (data.ideas || []).sort((a, b) => {
+    // 按日期和时间倒序排序，确保最新的在最上面，并过滤掉已删除的项目
+    const ideas = (data.ideas || []).filter(item => item.isDelete !== 0).sort((a, b) => {
         // 创建包含时间的完整日期对象
         const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
         const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
@@ -495,7 +495,7 @@ function renderWorks() {
     console.log('worksList元素:', elements.worksList);
     console.log('待渲染的作品数量:', data.works.length);
     
-    const works = (data.works || []).sort((a, b) => {
+    const works = (data.works || []).filter(item => item.isDelete !== 0).sort((a, b) => {
         const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
         const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
         return dateB - dateA;
@@ -584,8 +584,8 @@ function toggleLifeItemCompleted(id) {
 
 // 渲染生活
 function renderLife() {
-    // 按日期和时间倒序排序，确保最新的在最上面
-    const life = (data.life || []).sort((a, b) => {
+    // 按日期和时间倒序排序，确保最新的在最上面，并过滤掉已删除的项目
+    const life = (data.life || []).filter(item => item.isDelete !== 0).sort((a, b) => {
         const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
         const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
         return dateB - dateA;
@@ -616,7 +616,7 @@ function renderLife() {
 
 // 渲染健康
 function renderHealth() {
-    let health = (data.health || []).sort((a, b) => {
+    let health = (data.health || []).filter(item => item.isDelete !== 0).sort((a, b) => {
         const dateA = new Date(`${a.date} ${a.time || '00:00:00'}`);
         const dateB = new Date(`${b.date} ${b.time || '00:00:00'}`);
         return dateB - dateA;
@@ -954,8 +954,11 @@ async function performDelete() {
     }
     
     try {
-        // 从本地数据中删除
-        data[currentDeleteType] = data[currentDeleteType].filter(item => item.id !== currentDeleteId);
+        // 找到要删除的项目，将isDelete设置为0
+        const item = data[currentDeleteType].find(item => item.id === currentDeleteId);
+        if (item) {
+            item.isDelete = 0;
+        }
         // 保存到本地存储
         await saveData();
         // 重新渲染内容
