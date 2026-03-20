@@ -104,6 +104,14 @@ async function createTables() {
       )
     `);
     
+    // 尝试为现有表添加isDelete字段
+    try {
+      await connection.execute(`ALTER TABLE articles ADD COLUMN isDelete INT DEFAULT 1`);
+    } catch (error) {
+      // 如果字段已存在，忽略错误
+      console.log('articles表isDelete字段可能已存在:', error.message);
+    }
+    
     // 创建灵感表
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS ideas (
@@ -115,6 +123,14 @@ async function createTables() {
         isDelete INT DEFAULT 1
       )
     `);
+    
+    // 尝试为现有表添加isDelete字段
+    try {
+      await connection.execute(`ALTER TABLE ideas ADD COLUMN isDelete INT DEFAULT 1`);
+    } catch (error) {
+      // 如果字段已存在，忽略错误
+      console.log('ideas表isDelete字段可能已存在:', error.message);
+    }
     
     // 创建作品表
     await connection.execute(`
@@ -130,6 +146,14 @@ async function createTables() {
       )
     `);
     
+    // 尝试为现有表添加isDelete字段
+    try {
+      await connection.execute(`ALTER TABLE works ADD COLUMN isDelete INT DEFAULT 1`);
+    } catch (error) {
+      // 如果字段已存在，忽略错误
+      console.log('works表isDelete字段可能已存在:', error.message);
+    }
+    
     // 创建生活表
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS life (
@@ -144,6 +168,14 @@ async function createTables() {
       )
     `);
     
+    // 尝试为现有表添加isDelete字段
+    try {
+      await connection.execute(`ALTER TABLE life ADD COLUMN isDelete INT DEFAULT 1`);
+    } catch (error) {
+      // 如果字段已存在，忽略错误
+      console.log('life表isDelete字段可能已存在:', error.message);
+    }
+    
     // 创建健康表
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS health (
@@ -155,6 +187,14 @@ async function createTables() {
         isDelete INT DEFAULT 1
       )
     `);
+    
+    // 尝试为现有表添加isDelete字段
+    try {
+      await connection.execute(`ALTER TABLE health ADD COLUMN isDelete INT DEFAULT 1`);
+    } catch (error) {
+      // 如果字段已存在，忽略错误
+      console.log('health表isDelete字段可能已存在:', error.message);
+    }
     
     console.log('表结构创建成功');
     connection.release();
@@ -318,7 +358,7 @@ app.post('/api/data', async (req, res) => {
       for (const article of articles) {
         await connection.execute(
           'INSERT INTO articles (id, title, content, date, time, isDelete) VALUES (?, ?, ?, ?, ?, ?)',
-          [article.id, article.title, article.content, formatDate(article.date), article.time, article.isDelete || 1]
+          [article.id, article.title, article.content, formatDate(article.date), article.time, article.isDelete !== undefined ? article.isDelete : 1]
         );
       }
       
@@ -326,7 +366,7 @@ app.post('/api/data', async (req, res) => {
       for (const idea of ideas) {
         await connection.execute(
           'INSERT INTO ideas (id, title, content, date, time, isDelete) VALUES (?, ?, ?, ?, ?, ?)',
-          [idea.id, idea.title, idea.content, formatDate(idea.date), idea.time, idea.isDelete || 1]
+          [idea.id, idea.title, idea.content, formatDate(idea.date), idea.time, idea.isDelete !== undefined ? idea.isDelete : 1]
         );
       }
       
@@ -334,7 +374,7 @@ app.post('/api/data', async (req, res) => {
       for (const work of works) {
         await connection.execute(
           'INSERT INTO works (id, title, description, category, image, date, time, isDelete) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-          [work.id, work.title, work.description, work.category, work.image, formatDate(work.date), work.time, work.isDelete || 1]
+          [work.id, work.title, work.description, work.category, work.image, formatDate(work.date), work.time, work.isDelete !== undefined ? work.isDelete : 1]
         );
       }
       
@@ -342,7 +382,7 @@ app.post('/api/data', async (req, res) => {
       for (const lifeItem of life) {
         await connection.execute(
           'INSERT INTO life (id, title, content, date, time, completed, emoji, isDelete) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-          [lifeItem.id, lifeItem.title, lifeItem.content, formatDate(lifeItem.date), lifeItem.time, lifeItem.completed || false, lifeItem.emoji || '📝', lifeItem.isDelete || 1]
+          [lifeItem.id, lifeItem.title, lifeItem.content, formatDate(lifeItem.date), lifeItem.time, lifeItem.completed || false, lifeItem.emoji || '📝', lifeItem.isDelete !== undefined ? lifeItem.isDelete : 1]
         );
       }
       
@@ -350,7 +390,7 @@ app.post('/api/data', async (req, res) => {
       for (const healthItem of health) {
         await connection.execute(
           'INSERT INTO health (id, title, content, date, time, isDelete) VALUES (?, ?, ?, ?, ?, ?)',
-          [healthItem.id, healthItem.title, healthItem.content, formatDate(healthItem.date), healthItem.time, healthItem.isDelete || 1]
+          [healthItem.id, healthItem.title, healthItem.content, formatDate(healthItem.date), healthItem.time, healthItem.isDelete !== undefined ? healthItem.isDelete : 1]
         );
       }
       
