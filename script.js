@@ -9,17 +9,9 @@ let db;
 
 // API配置
 const API_CONFIG = {
-  // 基础URL，根据环境调整
-  baseUrl: function() {
-    // 检查当前域名
-    const currentDomain = window.location.hostname;
-    // 如果是本地开发环境，使用localhost
-    if (currentDomain === 'localhost' || currentDomain === '127.0.0.1') {
-      return 'http://localhost:3001';
-    }
-    // 否则使用腾讯云函数的URL地址
-    return 'https://1253924480-49300ut5v8.ap-shanghai.tencentscf.com';
-  }()
+  // 基础URL，使用相对路径
+  // 这样在任何环境中都会自动指向当前域名
+  baseUrl: ''
 };
 
 // 初始化数据
