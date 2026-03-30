@@ -1044,3 +1044,59 @@ body.light-mode #edit-cancel {
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(66, 153, 225, 0.7);
 }
+
+/* 底部备案信息 */
+.footer {
+    width: 100%;
+    padding: 16px 0;
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(66, 153, 225, 0.1);
+    margin-top: 40px;
+}
+
+/* 夜间模式 */
+body.dark-mode .footer {
+    background: rgba(10, 10, 15, 0.8);
+}
+
+body.dark-mode .icp-link {
+    color: #8a9ba8;
+}
+
+/* 日间模式 */
+body.light-mode .footer {
+    background: rgba(255, 255, 255, 0.8);
+    border-top: 1px solid rgba(66, 153, 225, 0.2);
+}
+
+body.light-mode .icp-link {
+    color: #6c757d;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icp-link {
+    font-size: 14px;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.icp-link:hover {
+    color: #4299e1;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .footer {
+        padding: 12px 0;
+        margin-top: 20px;
+    }
+    
+    .icp-link {
+        font-size: 12px;
+    }
+}
